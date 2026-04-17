@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Community Regenerative Solutions | Employment Application</title>
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="form-header">
+        <p class="eyebrow">Texas PAS Agency</p>
+        <h1>Community Regenerative Solutions</h1>
+        <p>Employment Application</p>
+      </header>
+
+      <section class="notice" aria-label="Form instructions">
+        <p>Please complete this employment application as accurately as possible. Required fields are marked with an asterisk.</p>
+      </section>
+
+      <!-- Public applicant-facing form. Edit labels and fields here when the application changes. -->
+      <form id="applicationForm" class="application-form" method="POST" action="https://formspree.io/f/mpqkpbwo" enctype="multipart/form-data" novalidate>
+        <div id="errorSummary" class="error-summary" tabindex="-1" hidden></div>
+
+        <!-- Section 1: applicant contact details -->
+        <section class="form-section" aria-labelledby="personalInfoTitle">
+          <h2 id="personalInfoTitle">Applicant Information</h2>
+          <label for="fullName">Full Legal Name <span>*</span></label>
+          <input id="fullName" name="fullName" autocomplete="name" required>
+
+          <label for="phone">Phone Number <span>*</span></label>
+          <input id="phone" name="phone" type="tel" autocomplete="tel" required>
+
+          <label for="email">Email Address <span>*</span></label>
+          <input id="email" name="email" type="email" autocomplete="email" required>
+
+          <label for="address">Home Address <span>*</span></label>
+          <textarea id="address" name="address" rows="3" autocomplete="street-address" required></textarea>
+        </section>
+
+        <!-- Section 2: role interest and schedule availability -->
+        <section class="form-section" aria-labelledby="positionTitle">
+          <h2 id="positionTitle">Position Information</h2>
+          <label for="position">Position Applying For <span>*</span></label>
+          <input id="position" name="position" placeholder="Example: Caregiver, attendant, personal care aide" required>
+
+          <label for="availability">Availability <span>*</span></label>
+          <textarea id="availability" name="availability" rows="4" placeholder="Example: Monday-Friday mornings, weekends, overnight shifts" required></textarea>
+        </section>
+
+        <!-- Section 3: basic required qualifications -->
+        <section class="form-section" aria-labelledby="qualificationsTitle">
+          <h2 id="qualificationsTitle">Basic Qualifications</h2>
+
+          <fieldset>
+            <legend>Are you legally authorized to work in the United States? <span>*</span></legend>
+            <label class="choice"><input type="radio" name="authorizedToWork" value="Yes" required> Yes</label>
+            <label class="choice"><input type="radio" name="authorizedToWork" value="No"> No</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Do you have reliable transportation? <span>*</span></legend>
+            <label class="choice"><input type="radio" name="reliableTransportation" value="Yes" required> Yes</label>
+            <label class="choice"><input type="radio" name="reliableTransportation" value="No"> No</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Are you able to assist with personal care tasks such as bathing, dressing, toileting, transfers, mobility assistance, and light housekeeping? <span>*</span></legend>
+            <label class="choice"><input type="radio" name="personalCareTasks" value="Yes" required> Yes</label>
+            <label class="choice"><input type="radio" name="personalCareTasks" value="No"> No</label>
+          </fieldset>
+        </section>
+
+        <!-- Section 4: caregiving experience. The detail box is controlled by src/app.js. -->
+        <section class="form-section" aria-labelledby="experienceTitle">
+          <h2 id="experienceTitle">Experience</h2>
+          <fieldset>
+            <legend>Do you have caregiving experience? <span>*</span></legend>
+            <label class="choice"><input id="careExperienceYes" type="radio" name="caregivingExperience" value="Yes" required> Yes</label>
+            <label class="choice"><input type="radio" name="caregivingExperience" value="No"> No</label>
+          </fieldset>
+
+          <div id="experienceDetailsGroup" class="conditional-field" hidden>
+            <label for="experienceDetails">Briefly describe your caregiving experience</label>
+            <textarea id="experienceDetails" name="experienceDetails" rows="4" placeholder="Share past caregiving, attendant, facility, family care, or home care experience."></textarea>
+          </div>
+        </section>
+
+        <!-- Section 5: employment history. Employer 1 is required; Employers 2 and 3 are optional. -->
+        <section class="form-section" aria-labelledby="previousEmploymentTitle">
+          <h2 id="previousEmploymentTitle">Previous Employment</h2>
+
+          <fieldset class="subsection">
+            <legend>Previous Employment 1 <span>*</span></legend>
+            <label for="employer1Name">Employer Name <span>*</span></label>
+            <input id="employer1Name" name="employer1Name" required>
+
+            <label for="employer1JobTitle">Job Title <span>*</span></label>
+            <input id="employer1JobTitle" name="employer1JobTitle" required>
+
+            <label for="employer1Supervisor">Supervisor Name <span>*</span></label>
+            <input id="employer1Supervisor" name="employer1Supervisor" required>
+
+            <label for="employer1Phone">Employer Phone Number <span>*</span></label>
+            <input id="employer1Phone" name="employer1Phone" type="tel" required>
+
+            <label for="employer1Address">Employer Address <span>*</span></label>
+            <textarea id="employer1Address" name="employer1Address" rows="3" required></textarea>
+
+            <label for="employer1StartDate">Start Date <span>*</span></label>
+            <input id="employer1StartDate" name="employer1StartDate" type="date" required>
+
+            <label for="employer1EndDate">End Date <span>*</span></label>
+            <input id="employer1EndDate" name="employer1EndDate" type="date" required>
+
+            <label for="employer1Reason">Reason for Leaving <span>*</span></label>
+            <textarea id="employer1Reason" name="employer1Reason" rows="3" required></textarea>
+
+            <fieldset>
+              <legend>May we contact this employer? <span>*</span></legend>
+              <label class="choice"><input type="radio" name="employer1MayContact" value="Yes" required> Yes</label>
+              <label class="choice"><input type="radio" name="employer1MayContact" value="No"> No</label>
+            </fieldset>
+          </fieldset>
+
+          <fieldset class="subsection">
+            <legend>Previous Employment 2</legend>
+            <label for="employer2Name">Employer Name</label>
+            <input id="employer2Name" name="employer2Name">
+
+            <label for="employer2JobTitle">Job Title</label>
+            <input id="employer2JobTitle" name="employer2JobTitle">
+
+            <label for="employer2Supervisor">Supervisor Name</label>
+            <input id="employer2Supervisor" name="employer2Supervisor">
+
+            <label for="employer2Phone">Employer Phone Number</label>
+            <input id="employer2Phone" name="employer2Phone" type="tel">
+
+            <label for="employer2Address">Employer Address</label>
+            <textarea id="employer2Address" name="employer2Address" rows="3"></textarea>
+
+            <label for="employer2StartDate">Start Date</label>
+            <input id="employer2StartDate" name="employer2StartDate" type="date">
+
+            <label for="employer2EndDate">End Date</label>
+            <input id="employer2EndDate" name="employer2EndDate" type="date">
+
+            <label for="employer2Reason">Reason for Leaving</label>
+            <textarea id="employer2Reason" name="employer2Reason" rows="3"></textarea>
+
+            <fieldset>
+              <legend>May we contact this employer?</legend>
+              <label class="choice"><input type="radio" name="employer2MayContact" value="Yes"> Yes</label>
+              <label class="choice"><input type="radio" name="employer2MayContact" value="No"> No</label>
+            </fieldset>
+          </fieldset>
+
+          <fieldset class="subsection">
+            <legend>Previous Employment 3</legend>
+            <label for="employer3Name">Employer Name</label>
+            <input id="employer3Name" name="employer3Name">
+
+            <label for="employer3JobTitle">Job Title</label>
+            <input id="employer3JobTitle" name="employer3JobTitle">
+
+            <label for="employer3Supervisor">Supervisor Name</label>
+            <input id="employer3Supervisor" name="employer3Supervisor">
+
+            <label for="employer3Phone">Employer Phone Number</label>
+            <input id="employer3Phone" name="employer3Phone" type="tel">
+
+            <label for="employer3Address">Employer Address</label>
+            <textarea id="employer3Address" name="employer3Address" rows="3"></textarea>
+
+            <label for="employer3StartDate">Start Date</label>
+            <input id="employer3StartDate" name="employer3StartDate" type="date">
+
+            <label for="employer3EndDate">End Date</label>
+            <input id="employer3EndDate" name="employer3EndDate" type="date">
+
+            <label for="employer3Reason">Reason for Leaving</label>
+            <textarea id="employer3Reason" name="employer3Reason" rows="3"></textarea>
+
+            <fieldset>
+              <legend>May we contact this employer?</legend>
+              <label class="choice"><input type="radio" name="employer3MayContact" value="Yes"> Yes</label>
+              <label class="choice"><input type="radio" name="employer3MayContact" value="No"> No</label>
+            </fieldset>
+          </fieldset>
+        </section>
+
+        <!-- Section 6: education background -->
+        <section class="form-section" aria-labelledby="educationTitle">
+          <h2 id="educationTitle">Education</h2>
+          <label for="educationLevel">Highest Level of Education Completed <span>*</span></label>
+          <select id="educationLevel" name="educationLevel" required>
+            <option value="">Select one</option>
+            <option>High School Diploma or GED</option>
+            <option>Some College</option>
+            <option>Associate Degree</option>
+            <option>Bachelor's Degree</option>
+            <option>Graduate Degree</option>
+            <option>Other</option>
+          </select>
+
+          <label for="schoolName">School Name</label>
+          <input id="schoolName" name="schoolName">
+
+          <label for="schoolLocation">City/State</label>
+          <input id="schoolLocation" name="schoolLocation" placeholder="Example: Dallas, TX">
+
+          <label for="degreeEarned">Degree or Certification Earned</label>
+          <input id="degreeEarned" name="degreeEarned">
+
+          <label for="graduationDate">Graduation Date or Last Date Attended</label>
+          <input id="graduationDate" name="graduationDate" type="date">
+        </section>
+
+        <!-- Section 7: references. Reference 1 is required; References 2 and 3 are optional. -->
+        <section class="form-section" aria-labelledby="referencesTitle">
+          <h2 id="referencesTitle">References</h2>
+
+          <fieldset class="subsection">
+            <legend>Reference 1 <span>*</span></legend>
+            <label for="reference1Name">Full Name <span>*</span></label>
+            <input id="reference1Name" name="reference1Name" required>
+
+            <label for="reference1Relationship">Relationship <span>*</span></label>
+            <input id="reference1Relationship" name="reference1Relationship" required>
+
+            <label for="reference1Phone">Phone Number <span>*</span></label>
+            <input id="reference1Phone" name="reference1Phone" type="tel" required>
+
+            <label for="reference1Email">Email Address <span>*</span></label>
+            <input id="reference1Email" name="reference1Email" type="email" required>
+          </fieldset>
+
+          <fieldset class="subsection">
+            <legend>Reference 2</legend>
+            <label for="reference2Name">Full Name</label>
+            <input id="reference2Name" name="reference2Name">
+
+            <label for="reference2Relationship">Relationship</label>
+            <input id="reference2Relationship" name="reference2Relationship">
+
+            <label for="reference2Phone">Phone Number</label>
+            <input id="reference2Phone" name="reference2Phone" type="tel">
+
+            <label for="reference2Email">Email Address</label>
+            <input id="reference2Email" name="reference2Email" type="email">
+          </fieldset>
+
+          <fieldset class="subsection">
+            <legend>Reference 3</legend>
+            <label for="reference3Name">Full Name</label>
+            <input id="reference3Name" name="reference3Name">
+
+            <label for="reference3Relationship">Relationship</label>
+            <input id="reference3Relationship" name="reference3Relationship">
+
+            <label for="reference3Phone">Phone Number</label>
+            <input id="reference3Phone" name="reference3Phone" type="tel">
+
+            <label for="reference3Email">Email Address</label>
+            <input id="reference3Email" name="reference3Email" type="email">
+          </fieldset>
+        </section>
+
+        <!-- Section 8: criminal history. The explanation box is controlled by src/app.js. -->
+        <section class="form-section" aria-labelledby="criminalHistoryTitle">
+          <h2 id="criminalHistoryTitle">Criminal History</h2>
+          <fieldset>
+            <legend>Have you ever been convicted of a felony? <span>*</span></legend>
+            <label class="choice"><input type="radio" name="felonyConviction" value="Yes" required> Yes</label>
+            <label class="choice"><input type="radio" name="felonyConviction" value="No"> No</label>
+          </fieldset>
+
+          <div id="felonyExplanationGroup" class="conditional-field" hidden>
+            <label for="felonyExplanation">If yes, explain <span>*</span></label>
+            <textarea id="felonyExplanation" name="felonyExplanation" rows="4" placeholder="Briefly explain the conviction, date, and current status."></textarea>
+          </div>
+
+          <p class="helper-note">A conviction does not automatically disqualify you from employment. Additional review may be required.</p>
+        </section>
+
+        <!-- Section 9: emergency contact details -->
+        <section class="form-section" aria-labelledby="emergencyTitle">
+          <h2 id="emergencyTitle">Emergency Contact</h2>
+          <label for="emergencyName">Emergency Contact Name <span>*</span></label>
+          <input id="emergencyName" name="emergencyName" required>
+
+          <label for="emergencyPhone">Emergency Contact Phone Number <span>*</span></label>
+          <input id="emergencyPhone" name="emergencyPhone" type="tel" autocomplete="tel" required>
+        </section>
+
+        <!-- Section 10: optional resume upload. A backend is needed before files can be sent anywhere. -->
+        <section class="form-section" aria-labelledby="uploadsTitle">
+          <h2 id="uploadsTitle">Uploads</h2>
+          <label for="resume">Upload Resume</label>
+          <input id="resume" name="resume" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+        </section>
+
+        <!-- Section 11: required acknowledgments and typed signature -->
+        <section class="form-section" aria-labelledby="agreementTitle">
+          <h2 id="agreementTitle">Acknowledgment and Authorization</h2>
+
+          <label class="choice checkbox-choice">
+            <input type="checkbox" name="certifyTrueComplete" required>
+            <span>I certify that the information provided in this application is true and complete to the best of my knowledge.</span>
+          </label>
+
+          <label class="choice checkbox-choice">
+            <input type="checkbox" name="falseInfoAcknowledgment" required>
+            <span>I understand that any false, misleading, or omitted information may result in disqualification from consideration or termination of employment if hired.</span>
+          </label>
+
+          <label class="choice checkbox-choice">
+            <input type="checkbox" name="authorizeVerification" required>
+            <span>I authorize Community Regenerative Solutions to verify the information provided in this application, including previous employment, education, and references, to the extent permitted by law.</span>
+          </label>
+
+          <label class="choice checkbox-choice">
+            <input type="checkbox" name="noGuaranteeAcknowledgment" required>
+            <span>I understand that submission of this application does not guarantee employment.</span>
+          </label>
+
+          <label for="signature">Applicant Signature <span>*</span></label>
+          <input id="signature" name="signature" placeholder="Type your full legal name" required>
+
+          <label for="signatureDate">Date <span>*</span></label>
+          <input id="signatureDate" name="signatureDate" type="date" required>
+        </section>
+
+        <div id="submissionStatus" class="submission-status" role="status" aria-live="polite" hidden></div>
+        <button class="submit-button" type="submit">Submit Application</button>
+      </form>
+
+      <section id="successMessage" class="success-message" hidden tabindex="-1">
+        <h2>Your application has been submitted successfully.</h2>
+        <p>Thank you for applying with Community Regenerative Solutions.</p>
+        <a id="downloadPdfLink" class="download-link" href="#" download="CRS-employment-application.pdf">Download completed application PDF</a>
+      </section>
+    </main>
+
+    <script src="src/config.js"></script>
+    <script src="src/pdf-generator.js"></script>
+    <script src="src/app.js"></script>
+  </body>
+</html>
