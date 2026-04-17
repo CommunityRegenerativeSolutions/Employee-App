@@ -12,15 +12,15 @@ const submissionStatus = document.querySelector("#submissionStatus");
 const appConfig = window.CRSApplicationConfig || {};
 
 function configureFormSubmissionAttributes() {
-  if (!isEmailEndpointConfigured()) {
-    console.error("CRS application: Formspree endpoint is missing in src/config.js.");
+  if (!isSubmissionEndpointConfigured()) {
+    console.error("CRS application: Submission endpoint is missing in src/config.js.");
     return;
   }
 
   form.method = "POST";
-  form.action = appConfig.formspreeEndpoint;
-  form.enctype = "multipart/form-data";
-  console.info("CRS application: Form configured to POST to Formspree.", form.action);
+  form.action = appConfig.submissionEndpoint;
+  form.enctype = "application/x-www-form-urlencoded";
+  console.info("CRS application: Form configured to POST to server route.", form.action);
 }
 
 // Set today's date as a convenience. The applicant can still change it.
@@ -371,62 +371,49 @@ function buildEmailBody(submission) {
   return lines.join("\n");
 }
 
-function isEmailEndpointConfigured() {
-  return Boolean(appConfig.formspreeEndpoint && !appConfig.formspreeEndpoint.includes("REPLACE_WITH_FORM_ID"));
+function isSubmissionEndpointConfigured() {
+  return Boolean(appConfig.submissionEndpoint);
 }
 
-function buildEmailPayload(submission, pdfBlob) {
-  /*
-    Keep the email payload text-only for reliability.
-    Formspree file uploads/Blob attachments can fail depending on plan, browser,
-    and hosting setup. The PDF is still generated locally for download.
-  */
-  const payload = new FormData();
-  const subjectName = submission.applicant.fullName || "New Applicant";
-
-  payload.append("_subject", `Employment Application - ${subjectName}`);
-  payload.append("_replyto", submission.applicant.email || "");
-  payload.append("email", submission.applicant.email || "");
-  payload.append("name", submission.applicant.fullName || "");
-  payload.append("send_to", appConfig.submissionEmail || "Info@communityregenerativesolutions.com");
-  payload.append("submitted_at", submission.submittedAtDisplay);
-  payload.append("applicant_name", submission.applicant.fullName || "");
-  payload.append("applicant_email", submission.applicant.email || "");
-  payload.append("message", buildEmailBody(submission));
-  payload.append("pdf_note", "A completed PDF was generated in the applicant browser and is available from the success screen download link.");
-  payload.append("resume_file_name", submission.files.resume || "Not provided");
-
-  return payload;
+function buildServerPayload(submission) {
+  return {
+    submittedAt: submission.submittedAt,
+    submittedAtDisplay: submission.submittedAtDisplay,
+    applicant: submission.applicant,
+    files: submission.files,
+    emailBody: buildEmailBody(submission)
+  };
 }
 
 async function sendApplicationEmail(submission, pdfBlob) {
-  if (!isEmailEndpointConfigured()) {
-    console.error("CRS application: Cannot submit because Formspree endpoint is missing.");
-    throw new Error("Submission is not configured yet. Please check the Formspree setup.");
+  if (!isSubmissionEndpointConfigured()) {
+    console.error("CRS application: Cannot submit because server endpoint is missing.");
+    throw new Error("Submission is not configured yet. Please check the server setup.");
   }
 
-  console.info("CRS application: Sending POST request to Formspree.", appConfig.formspreeEndpoint);
+  console.info("CRS application: Sending POST request to server route.", appConfig.submissionEndpoint);
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), 20000);
 
   try {
-    const response = await fetch(appConfig.formspreeEndpoint, {
+    const response = await fetch(appConfig.submissionEndpoint, {
       method: "POST",
       headers: {
-        Accept: "application/json"
+        Accept: "application/json",
+        "Content-Type": "application/json"
       },
-      body: buildEmailPayload(submission, pdfBlob),
+      body: JSON.stringify(buildServerPayload(submission)),
       signal: controller.signal
     });
 
     if (!response.ok) {
       const responseText = await response.text();
-      console.error("CRS application: Formspree failure response:", response.status, responseText);
-      throw new Error("Submission failed. Please check the form setup and try again.");
+      console.error("CRS application: Server failure response:", response.status, responseText);
+      throw new Error("Submission failed. The application email could not be sent. Please try again.");
     }
 
     const responseData = await response.json().catch(() => ({}));
-    console.info("CRS application: Formspree success response:", response.status, responseData);
+    console.info("CRS application: Server success response:", response.status, responseData);
   } catch (error) {
     console.error("CRS application: Request failed or timed out:", error);
     if (error.name === "AbortError") {
@@ -451,7 +438,7 @@ form.addEventListener("change", () => {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   console.info("CRS application: Submit started.");
-  console.info("CRS application: Formspree endpoint configured:", isEmailEndpointConfigured(), appConfig.formspreeEndpoint || "(missing)");
+  console.info("CRS application: Server endpoint configured:", isSubmissionEndpointConfigured(), appConfig.submissionEndpoint || "(missing)");
   clearStatus();
 
   const messages = validateForm();
