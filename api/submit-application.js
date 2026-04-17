@@ -2,6 +2,7 @@ const { Resend } = require("resend");
 
 const PAGE = { width: 612, height: 792, margin: 42 };
 const FONT = { body: "F1", bold: "F2" };
+const JOB_DESCRIPTION_TEXT = "[PASTE YOUR TEXT HERE]";
 
 function normalizeText(value) {
   if (value === true) return "Yes";
@@ -128,6 +129,17 @@ function createPdfContext() {
     y -= height;
   }
 
+  function paragraph(textValue) {
+    const lines = wrapText(textValue, 95);
+    const lineHeight = 11;
+    ensure(lines.length * lineHeight + 10);
+    lines.forEach((lineText) => {
+      text(lineText, PAGE.margin, y, 9);
+      y -= lineHeight;
+    });
+    y -= 8;
+  }
+
   function table(headers, rows, columnWidths) {
     if (!rows.length) return;
     const totalWidth = columnWidths.reduce((sum, item) => sum + item, 0);
@@ -193,7 +205,7 @@ function createPdfContext() {
     return pages;
   }
 
-  return { title, section, fieldRow, fullField, table, employmentBlock, finish };
+  return { title, section, fieldRow, fullField, paragraph, table, employmentBlock, finish };
 }
 
 function buildPdfPages(data) {
@@ -294,6 +306,19 @@ function buildPdfPages(data) {
   pdf.fieldRow([
     ["Applicant Signature", value(data, "signature")],
     ["Date", value(data, "signatureDate")]
+  ]);
+
+  pdf.section("Job Description Acknowledgment");
+  pdf.paragraph(JOB_DESCRIPTION_TEXT);
+  pdf.table(
+    ["Acknowledgment", "Checked"],
+    [["I have read and understand the duties and responsibilities of the Personal Assistance Services (PAS) Attendant position.", checked(data.jobDescriptionAcknowledged)]],
+    [440, 90]
+  );
+  pdf.fieldRow([
+    ["Full Name", value(data, "jobDescriptionFullName")],
+    ["Signature", value(data, "jobDescriptionSignature")],
+    ["Date", value(data, "jobDescriptionDate")]
   ]);
 
   return pdf.finish();

@@ -359,6 +359,26 @@
           <input id="signatureDate" name="signatureDate" type="date" required>
         </section>
 
+        <!-- Job description acknowledgment is included in the final PDF hiring packet. -->
+        <section class="form-section" aria-labelledby="jobDescriptionTitle">
+          <h2 id="jobDescriptionTitle">Job Description Acknowledgment</h2>
+          <p class="helper-note">[PASTE YOUR TEXT HERE]</p>
+
+          <label class="choice checkbox-choice">
+            <input type="checkbox" name="jobDescriptionAcknowledged" required>
+            <span>I have read and understand the duties and responsibilities of the Personal Assistance Services (PAS) Attendant position.</span>
+          </label>
+
+          <label for="jobDescriptionFullName">Full Name <span>*</span></label>
+          <input id="jobDescriptionFullName" name="jobDescriptionFullName" required>
+
+          <label for="jobDescriptionSignature">Signature <span>*</span></label>
+          <input id="jobDescriptionSignature" name="jobDescriptionSignature" placeholder="Type your full legal name" required>
+
+          <label for="jobDescriptionDate">Date <span>*</span></label>
+          <input id="jobDescriptionDate" name="jobDescriptionDate" type="date" required>
+        </section>
+
         <div id="submissionStatus" class="submission-status" role="status" aria-live="polite" hidden></div>
         <button class="submit-button" type="submit">Submit Application</button>
       </form>

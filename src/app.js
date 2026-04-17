@@ -6,6 +6,7 @@ const experienceDetails = document.querySelector("#experienceDetails");
 const felonyExplanationGroup = document.querySelector("#felonyExplanationGroup");
 const felonyExplanation = document.querySelector("#felonyExplanation");
 const signatureDate = document.querySelector("#signatureDate");
+const jobDescriptionDate = document.querySelector("#jobDescriptionDate");
 const downloadPdfLink = document.querySelector("#downloadPdfLink");
 const submitButton = form.querySelector(".submit-button");
 const submissionStatus = document.querySelector("#submissionStatus");
@@ -25,6 +26,7 @@ function configureFormSubmissionAttributes() {
 
 // Set today's date as a convenience. The applicant can still change it.
 signatureDate.value = new Date().toISOString().slice(0, 10);
+jobDescriptionDate.value = new Date().toISOString().slice(0, 10);
 
 // These labels make validation messages clear for nontechnical applicants.
 const fieldLabels = {
@@ -69,7 +71,11 @@ const fieldLabels = {
   authorizeVerification: "Authorization to verify application information",
   noGuaranteeAcknowledgment: "Acknowledgment that application submission does not guarantee employment",
   signature: "Signature",
-  signatureDate: "Date"
+  signatureDate: "Date",
+  jobDescriptionAcknowledged: "Job Description Acknowledgment checkbox",
+  jobDescriptionFullName: "Job Description Acknowledgment Full Name",
+  jobDescriptionSignature: "Job Description Acknowledgment Signature",
+  jobDescriptionDate: "Job Description Acknowledgment Date"
 };
 
 const emailSections = [
@@ -179,6 +185,15 @@ const emailSections = [
     rows: [
       ["Applicant Signature", "signature"],
       ["Date", "signatureDate"]
+    ]
+  },
+  {
+    title: "Job Description Acknowledgment",
+    rows: [
+      ["Acknowledgment Checked", "jobDescriptionAcknowledged"],
+      ["Full Name", "jobDescriptionFullName"],
+      ["Signature", "jobDescriptionSignature"],
+      ["Date", "jobDescriptionDate"]
     ]
   }
 ];
