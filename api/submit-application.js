@@ -308,9 +308,9 @@ async function sendEmail({ pdfBuffer }) {
 
   const resend = new Resend(process.env.RESEND_API_KEY);
 
-  return resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: "onboarding@resend.dev",
-    to: "Info@communityregenerativesolutions.com",
+    to: "info@communityregenerativesolutiins.com",
     subject: "New CRS Employment Application",
     html: "<p>New application submitted</p>",
     attachments: [
@@ -320,6 +320,14 @@ async function sendEmail({ pdfBuffer }) {
       }
     ]
   });
+
+  if (error) {
+    console.error("Resend email failed:", error);
+    throw new Error(`Resend email failed: ${error.message || JSON.stringify(error)}`);
+  }
+
+  console.info("Resend email sent:", data);
+  return data;
 }
 
 module.exports = async function handler(req, res) {
@@ -339,7 +347,7 @@ module.exports = async function handler(req, res) {
 
     return res.status(200).json({
       ok: true,
-      emailId: emailResult.id
+      emailId: emailResult?.id
     });
   } catch (error) {
     console.error("CRS application submission failed:", error);
