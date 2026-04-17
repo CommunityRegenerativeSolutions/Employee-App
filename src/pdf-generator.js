@@ -1,148 +1,31 @@
 /*
-  Simple browser-side PDF generator.
-  No external library is used. The code below writes a basic text PDF Blob that
-  can be downloaded, printed, emailed later, or uploaded to a private admin app.
+  Browser-side PDF generator for the applicant download copy.
+  This creates a black-and-white, print-ready employment application layout.
 */
 
-const pdfTemplate = [
-  {
-    title: "Personal Information",
-    rows: [
-      ["Full Legal Name", "fullName"],
-      ["Phone Number", "phone"],
-      ["Email Address", "email"],
-      ["Home Address", "address"]
-    ]
-  },
-  {
-    title: "Position Information",
-    rows: [
-      ["Position Applying For", "position"],
-      ["Availability", "availability"]
-    ]
-  },
-  {
-    title: "Qualifications",
-    rows: [
-      ["Legally Authorized to Work in the United States", "authorizedToWork"],
-      ["Reliable Transportation", "reliableTransportation"],
-      ["Able to Assist with Personal Care Tasks", "personalCareTasks"]
-    ]
-  },
-  {
-    title: "Criminal History",
-    rows: [
-      ["Felony Conviction", "felonyConviction"],
-      ["Explanation", "felonyExplanation"],
-      ["Note", "A conviction does not automatically disqualify you from employment. Additional review may be required."]
-    ]
-  },
-  {
-    title: "Experience",
-    rows: [
-      ["Caregiving Experience", "caregivingExperience"],
-      ["Experience Description", "experienceDetails"]
-    ]
-  },
-  {
-    title: "Previous Employment 1",
-    rows: employerRows("employer1")
-  },
-  {
-    title: "Previous Employment 2",
-    rows: employerRows("employer2")
-  },
-  {
-    title: "Previous Employment 3",
-    rows: employerRows("employer3")
-  },
-  {
-    title: "Education",
-    rows: [
-      ["Highest Level Completed", "educationLevel"],
-      ["School Name", "schoolName"],
-      ["City/State", "schoolLocation"],
-      ["Degree or Certification Earned", "degreeEarned"],
-      ["Graduation Date or Last Date Attended", "graduationDate"]
-    ]
-  },
-  {
-    title: "References",
-    rows: [
-      ["Reference 1 Name", "reference1Name"],
-      ["Reference 1 Relationship", "reference1Relationship"],
-      ["Reference 1 Phone", "reference1Phone"],
-      ["Reference 1 Email", "reference1Email"],
-      ["Reference 2 Name", "reference2Name"],
-      ["Reference 2 Relationship", "reference2Relationship"],
-      ["Reference 2 Phone", "reference2Phone"],
-      ["Reference 2 Email", "reference2Email"],
-      ["Reference 3 Name", "reference3Name"],
-      ["Reference 3 Relationship", "reference3Relationship"],
-      ["Reference 3 Phone", "reference3Phone"],
-      ["Reference 3 Email", "reference3Email"]
-    ]
-  },
-  {
-    title: "Emergency Contact",
-    rows: [
-      ["Emergency Contact Name", "emergencyName"],
-      ["Emergency Contact Phone Number", "emergencyPhone"]
-    ]
-  },
-  {
-    title: "Acknowledgment and Authorization",
-    rows: [
-      ["Information is true and complete", "certifyTrueComplete"],
-      ["False or omitted information acknowledgment", "falseInfoAcknowledgment"],
-      ["Authorization to verify information", "authorizeVerification"],
-      ["No guarantee of employment", "noGuaranteeAcknowledgment"]
-    ]
-  },
-  {
-    title: "Signature and Date",
-    rows: [
-      ["Applicant Signature", "signature"],
-      ["Date", "signatureDate"]
-    ]
-  }
-];
+const PAGE = { width: 612, height: 792, margin: 42 };
+const FONT = { body: "F1", bold: "F2" };
 
-function employerRows(prefix) {
-  return [
-    ["Employer Name", `${prefix}Name`],
-    ["Job Title", `${prefix}JobTitle`],
-    ["Supervisor Name", `${prefix}Supervisor`],
-    ["Employer Phone Number", `${prefix}Phone`],
-    ["Employer Address", `${prefix}Address`],
-    ["Start Date", `${prefix}StartDate`],
-    ["End Date", `${prefix}EndDate`],
-    ["Reason for Leaving", `${prefix}Reason`],
-    ["May Contact Employer", `${prefix}MayContact`]
-  ];
+function normalizePdfText(value) {
+  if (value === true) return "Yes";
+  if (value === false) return "No";
+
+  return String(value || "")
+    .normalize("NFKD")
+    .replace(/[^\x20-\x7E]/g, "")
+    .trim();
 }
 
 function escapePdfText(value) {
-  return String(value)
+  return normalizePdfText(value)
     .replace(/\\/g, "\\\\")
     .replace(/\(/g, "\\(")
     .replace(/\)/g, "\\)")
     .replace(/\r?\n/g, " ");
 }
 
-function normalizePdfText(value) {
-  if (value === true) {
-    return "Yes";
-  }
-
-  return String(value || "")
-    .normalize("NFKD")
-    .replace(/[^\x20-\x7E]/g, "")
-    .trim() || "";
-}
-
-function wrapPdfText(text, maxChars) {
-  const words = normalizePdfText(text).split(/\s+/).filter(Boolean);
+function wrapText(value, maxChars) {
+  const words = normalizePdfText(value).split(/\s+/).filter(Boolean);
   const lines = [];
   let line = "";
 
@@ -156,88 +39,273 @@ function wrapPdfText(text, maxChars) {
     line = next;
   });
 
-  if (line) {
-    lines.push(line);
-  }
-
+  if (line) lines.push(line);
   return lines.length ? lines : [""];
 }
 
-function getPdfValue(applicationData, keyOrText) {
-  if (Object.prototype.hasOwnProperty.call(applicationData, keyOrText)) {
-    return normalizePdfText(applicationData[keyOrText]);
-  }
-
-  return keyOrText;
+function value(data, key) {
+  return normalizePdfText(data[key]);
 }
 
-function drawText(stream, text, x, y, size = 10, font = "F1") {
-  stream.push(`BT /${font} ${size} Tf ${x} ${y} Td (${escapePdfText(text)}) Tj ET`);
+function checked(valueText) {
+  return normalizePdfText(valueText) ? "Yes" : "";
 }
 
-function addPage(pages, stream) {
-  pages.push(stream);
+function rowHasData(data, prefix, fields) {
+  return fields.some((field) => value(data, `${prefix}${field}`));
 }
 
-function buildPdfPages(applicationData) {
+function createPdfContext() {
   const pages = [];
   let stream = [];
-  let y = 742;
+  let y = 732;
 
-  function newPage() {
-    addPage(pages, stream);
-    stream = [];
-    y = 742;
-    drawText(stream, "Community Regenerative Solutions", 54, y, 16, "F2");
-    y -= 20;
-    drawText(stream, "Employment Application", 54, y, 13, "F2");
-    y -= 28;
+  function push(command) {
+    stream.push(command);
   }
 
-  function ensureRoom(spaceNeeded) {
-    if (y - spaceNeeded < 54) {
-      newPage();
+  function addPage() {
+    pages.push(stream);
+    stream = [];
+    y = 732;
+  }
+
+  function ensure(spaceNeeded) {
+    if (y - spaceNeeded < PAGE.margin) {
+      addPage();
     }
   }
 
-  drawText(stream, "Community Regenerative Solutions", 54, y, 18, "F2");
-  y -= 22;
-  drawText(stream, "Employment Application", 54, y, 14, "F2");
-  y -= 18;
-  drawText(stream, `Generated: ${new Date().toLocaleString()}`, 54, y, 9);
-  y -= 28;
+  function text(textValue, x, yPos, size = 9, font = FONT.body, color = 0) {
+    push(`${color} g BT /${font} ${size} Tf ${x} ${yPos} Td (${escapePdfText(textValue)}) Tj ET`);
+  }
 
-  pdfTemplate.forEach((section) => {
-    ensureRoom(34);
-    drawText(stream, section.title, 54, y, 12, "F2");
-    y -= 16;
+  function line(x1, y1, x2, y2, width = 0.7) {
+    push(`0 G ${width} w ${x1} ${y1} m ${x2} ${y2} l S`);
+  }
 
-    section.rows.forEach(([label, keyOrText]) => {
-      const value = getPdfValue(applicationData, keyOrText);
-      const labelLines = wrapPdfText(`${label}:`, 25);
-      const valueLines = wrapPdfText(value, 68);
-      const rowLines = Math.max(labelLines.length, valueLines.length);
-      ensureRoom(rowLines * 13 + 4);
+  function rect(x, yPos, width, height) {
+    push(`0 G 0.7 w ${x} ${yPos} ${width} ${height} re S`);
+  }
 
-      for (let index = 0; index < rowLines; index += 1) {
-        drawText(stream, labelLines[index] || "", 68, y, 9, "F2");
-        drawText(stream, valueLines[index] || "", 230, y, 9);
-        y -= 13;
-      }
+  function fillRect(x, yPos, width, height) {
+    push(`0 g ${x} ${yPos} ${width} ${height} re f`);
+  }
 
-      y -= 2;
+  function title() {
+    text("Community Regenerative Solutions", 132, 748, 18, FONT.bold);
+    text("Employment Application", 205, 724, 15, FONT.bold);
+    line(PAGE.margin, 710, PAGE.width - PAGE.margin, 710, 1);
+    y = 690;
+  }
+
+  function section(titleText) {
+    ensure(34);
+    fillRect(PAGE.margin, y - 4, PAGE.width - PAGE.margin * 2, 18);
+    text(titleText.toUpperCase(), PAGE.margin + 7, y + 1, 10, FONT.bold, 1);
+    y -= 26;
+  }
+
+  function field(label, fieldValue, x, width, options = {}) {
+    const labelSize = options.labelSize || 7;
+    const valueSize = options.valueSize || 9;
+    const lineY = y - 18;
+    text(label, x, y, labelSize, FONT.bold);
+    line(x, lineY, x + width, lineY);
+    wrapText(fieldValue, Math.max(12, Math.floor(width / 5.2))).slice(0, options.maxLines || 2).forEach((part, index) => {
+      text(part, x + 2, lineY + 4 - index * 10, valueSize);
+    });
+  }
+
+  function fieldRow(fields, height = 36) {
+    ensure(height + 4);
+    const gap = 12;
+    const width = (PAGE.width - PAGE.margin * 2 - gap * (fields.length - 1)) / fields.length;
+    fields.forEach(([label, fieldValue], index) => {
+      field(label, fieldValue, PAGE.margin + index * (width + gap), width);
+    });
+    y -= height;
+  }
+
+  function fullField(label, fieldValue, height = 42) {
+    ensure(height + 4);
+    field(label, fieldValue, PAGE.margin, PAGE.width - PAGE.margin * 2, { maxLines: 3 });
+    y -= height;
+  }
+
+  function table(headers, rows, columnWidths) {
+    if (!rows.length) return;
+    const totalWidth = columnWidths.reduce((sum, item) => sum + item, 0);
+    const startX = PAGE.margin;
+    const rowHeight = 24;
+    ensure(rowHeight * (rows.length + 1) + 8);
+
+    rect(startX, y - rowHeight, totalWidth, rowHeight);
+    let x = startX;
+    headers.forEach((header, index) => {
+      if (index > 0) line(x, y, x, y - rowHeight);
+      text(header, x + 4, y - 15, 8, FONT.bold);
+      x += columnWidths[index];
+    });
+    y -= rowHeight;
+
+    rows.forEach((row) => {
+      ensure(rowHeight + 4);
+      rect(startX, y - rowHeight, totalWidth, rowHeight);
+      x = startX;
+      row.forEach((cell, index) => {
+        if (index > 0) line(x, y, x, y - rowHeight);
+        wrapText(cell, Math.floor((columnWidths[index] - 8) / 5.2)).slice(0, 2).forEach((part, lineIndex) => {
+          text(part, x + 4, y - 11 - lineIndex * 9, 8);
+        });
+        x += columnWidths[index];
+      });
+      y -= rowHeight;
     });
 
-    y -= 8;
-  });
+    y -= 12;
+  }
 
-  addPage(pages, stream);
-  return pages;
+  function employmentBlock(label, data, prefix) {
+    const fields = ["Name", "JobTitle", "Supervisor", "Phone", "Address", "StartDate", "EndDate", "Reason", "MayContact"];
+    if (prefix !== "employer1" && !rowHasData(data, prefix, fields)) return;
+
+    ensure(150);
+    text(label, PAGE.margin, y, 10, FONT.bold);
+    y -= 10;
+    rect(PAGE.margin, y - 130, PAGE.width - PAGE.margin * 2, 130);
+    y -= 14;
+    fieldRow([
+      ["Employer Name", value(data, `${prefix}Name`)],
+      ["Job Title", value(data, `${prefix}JobTitle`)]
+    ], 30);
+    fieldRow([
+      ["Supervisor Name", value(data, `${prefix}Supervisor`)],
+      ["Employer Phone Number", value(data, `${prefix}Phone`)]
+    ], 30);
+    fullField("Employer Address", value(data, `${prefix}Address`), 32);
+    fieldRow([
+      ["Start Date", value(data, `${prefix}StartDate`)],
+      ["End Date", value(data, `${prefix}EndDate`)],
+      ["May Contact Employer", value(data, `${prefix}MayContact`)]
+    ], 30);
+    fullField("Reason for Leaving", value(data, `${prefix}Reason`), 32);
+    y -= 8;
+  }
+
+  function finish() {
+    pages.push(stream);
+    return pages;
+  }
+
+  return { title, section, fieldRow, fullField, table, employmentBlock, finish };
+}
+
+function buildPdfPages(data) {
+  const pdf = createPdfContext();
+  pdf.title();
+
+  pdf.section("Position Information");
+  pdf.fieldRow([
+    ["Position Applying For", value(data, "position")],
+    ["Date Available to Start", ""]
+  ]);
+  pdf.fieldRow([
+    ["Desired Schedule", value(data, "availability")],
+    ["Days Available", ""],
+    ["Preferred Shift(s)", ""]
+  ]);
+
+  pdf.section("Personal Information");
+  pdf.fieldRow([
+    ["Full Legal Name", value(data, "fullName")],
+    ["Phone Number", value(data, "phone")]
+  ]);
+  pdf.fieldRow([
+    ["Email Address", value(data, "email")],
+    ["Home Address", value(data, "address")]
+  ]);
+  pdf.fieldRow([
+    ["City", ""],
+    ["State", ""],
+    ["ZIP Code", ""]
+  ]);
+
+  pdf.section("Qualifications / Criminal History");
+  pdf.fieldRow([
+    ["Authorized to work in the U.S.", value(data, "authorizedToWork")],
+    ["Reliable transportation", value(data, "reliableTransportation")]
+  ]);
+  pdf.fieldRow([
+    ["Valid driver's license", ""],
+    ["Able to assist with personal care tasks", value(data, "personalCareTasks")]
+  ]);
+  pdf.fieldRow([
+    ["Felony conviction", value(data, "felonyConviction")]
+  ]);
+  if (value(data, "felonyExplanation")) {
+    pdf.fullField("Felony explanation", value(data, "felonyExplanation"), 48);
+  }
+
+  pdf.section("Education");
+  pdf.table(
+    ["Highest Level", "School Name", "City/State", "Degree/Certification", "Graduation/Last Date"],
+    [[
+      value(data, "educationLevel"),
+      value(data, "schoolName"),
+      value(data, "schoolLocation"),
+      value(data, "degreeEarned"),
+      value(data, "graduationDate")
+    ]],
+    [100, 110, 90, 130, 100]
+  );
+
+  pdf.section("Employment History");
+  pdf.employmentBlock("Previous Employment 1", data, "employer1");
+  pdf.employmentBlock("Previous Employment 2", data, "employer2");
+  pdf.employmentBlock("Previous Employment 3", data, "employer3");
+
+  pdf.section("References");
+  const references = [1, 2, 3].map((index) => [
+    value(data, `reference${index}Name`),
+    value(data, `reference${index}Relationship`),
+    value(data, `reference${index}Phone`),
+    value(data, `reference${index}Email`)
+  ]).filter((row, index) => index === 0 || row.some(Boolean));
+  pdf.table(["Name", "Relationship", "Phone", "Email"], references, [150, 115, 110, 155]);
+
+  pdf.section("Emergency Contact");
+  pdf.fieldRow([
+    ["Emergency Contact Name", value(data, "emergencyName")],
+    ["Relationship", ""]
+  ]);
+  pdf.fieldRow([
+    ["Emergency Contact Phone Number", value(data, "emergencyPhone")]
+  ]);
+
+  pdf.section("Acknowledgment and Authorization");
+  pdf.table(
+    ["Acknowledgment", "Checked"],
+    [
+      ["Information provided is true and complete to the best of my knowledge.", checked(data.certifyTrueComplete)],
+      ["False, misleading, or omitted information may affect employment.", checked(data.falseInfoAcknowledgment)],
+      ["CRS may verify employment, education, and references as permitted by law.", checked(data.authorizeVerification)],
+      ["Submission of this application does not guarantee employment.", checked(data.noGuaranteeAcknowledgment)]
+    ],
+    [440, 90]
+  );
+
+  pdf.section("Signature");
+  pdf.fieldRow([
+    ["Applicant Signature", value(data, "signature")],
+    ["Date", value(data, "signatureDate")]
+  ]);
+
+  return pdf.finish();
 }
 
 function buildPdfDocument(pageStreams) {
   const objects = [];
-
   function addObject(body) {
     objects.push(body);
     return objects.length;
@@ -260,7 +328,6 @@ function buildPdfDocument(pageStreams) {
 
   let pdf = "%PDF-1.4\n";
   const offsets = [0];
-
   objects.forEach((body, index) => {
     offsets.push(pdf.length);
     pdf += `${index + 1} 0 obj\n${body}\nendobj\n`;
@@ -278,8 +345,7 @@ function buildPdfDocument(pageStreams) {
 }
 
 function createEmploymentApplicationPdf(applicationData) {
-  const pageStreams = buildPdfPages(applicationData);
-  return buildPdfDocument(pageStreams);
+  return buildPdfDocument(buildPdfPages(applicationData));
 }
 
 window.CRSPdfGenerator = {

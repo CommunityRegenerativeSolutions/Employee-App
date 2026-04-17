@@ -321,13 +321,12 @@ function collectSubmissionPreview() {
 }
 
 function createPdfFileName(applicantName) {
-  const safeName = String(applicantName || "applicant")
+  const safeName = String(applicantName || "Applicant")
     .trim()
-    .replace(/[^a-z0-9]+/gi, "-")
-    .replace(/^-|-$/g, "")
-    .toLowerCase();
+    .replace(/[^a-z0-9]+/gi, "_")
+    .replace(/^_|_$/g, "");
 
-  return `CRS-employment-application-${safeName || "applicant"}.pdf`;
+  return `${safeName || "Applicant"}_Employment_Application.pdf`;
 }
 
 function preparePdfDownload(submission) {
