@@ -32,10 +32,17 @@ const fieldLabels = {
   phone: "Phone Number",
   email: "Email Address",
   address: "Home Address",
+  city: "City",
+  state: "State",
+  zipCode: "ZIP Code",
   position: "Position Applying For",
   availability: "Availability",
+  dateAvailable: "Date Available to Start",
+  daysAvailable: "Days Available",
+  preferredShifts: "Preferred Shift(s)",
   authorizedToWork: "Legal authorization to work in the United States",
   reliableTransportation: "Reliable transportation",
+  validDriversLicense: "Valid driver's license",
   personalCareTasks: "Ability to assist with personal care tasks",
   caregivingExperience: "Caregiving experience",
   employer1Name: "Previous Employment 1 Employer Name",
@@ -55,6 +62,7 @@ const fieldLabels = {
   felonyConviction: "Felony conviction question",
   felonyExplanation: "Felony explanation",
   emergencyName: "Emergency Contact Name",
+  emergencyRelationship: "Emergency Contact Relationship",
   emergencyPhone: "Emergency Contact Phone Number",
   certifyTrueComplete: "Certification that application information is true and complete",
   falseInfoAcknowledgment: "Acknowledgment about false, misleading, or omitted information",
@@ -71,14 +79,20 @@ const emailSections = [
       ["Full Legal Name", "fullName"],
       ["Phone Number", "phone"],
       ["Email Address", "email"],
-      ["Home Address", "address"]
+      ["Home Address", "address"],
+      ["City", "city"],
+      ["State", "state"],
+      ["ZIP Code", "zipCode"]
     ]
   },
   {
     title: "Position Information",
     rows: [
       ["Position Applying For", "position"],
-      ["Availability", "availability"]
+      ["Availability", "availability"],
+      ["Date Available to Start", "dateAvailable"],
+      ["Days Available", "daysAvailable"],
+      ["Preferred Shift(s)", "preferredShifts"]
     ]
   },
   {
@@ -86,6 +100,7 @@ const emailSections = [
     rows: [
       ["Legally Authorized to Work in the United States", "authorizedToWork"],
       ["Reliable Transportation", "reliableTransportation"],
+      ["Valid Driver's License", "validDriversLicense"],
       ["Able to Assist with Personal Care Tasks", "personalCareTasks"]
     ]
   },
@@ -146,6 +161,7 @@ const emailSections = [
     title: "Emergency Contact",
     rows: [
       ["Emergency Contact Name", "emergencyName"],
+      ["Emergency Contact Relationship", "emergencyRelationship"],
       ["Emergency Contact Phone Number", "emergencyPhone"]
     ]
   },

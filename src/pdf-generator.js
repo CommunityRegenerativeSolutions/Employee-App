@@ -208,12 +208,12 @@ function buildPdfPages(data) {
   pdf.section("Position Information");
   pdf.fieldRow([
     ["Position Applying For", value(data, "position")],
-    ["Date Available to Start", ""]
+    ["Date Available to Start", value(data, "dateAvailable")]
   ]);
   pdf.fieldRow([
     ["Desired Schedule", value(data, "availability")],
-    ["Days Available", ""],
-    ["Preferred Shift(s)", ""]
+    ["Days Available", value(data, "daysAvailable")],
+    ["Preferred Shift(s)", value(data, "preferredShifts")]
   ]);
 
   pdf.section("Personal Information");
@@ -226,9 +226,9 @@ function buildPdfPages(data) {
     ["Home Address", value(data, "address")]
   ]);
   pdf.fieldRow([
-    ["City", ""],
-    ["State", ""],
-    ["ZIP Code", ""]
+    ["City", value(data, "city")],
+    ["State", value(data, "state")],
+    ["ZIP Code", value(data, "zipCode")]
   ]);
 
   pdf.section("Qualifications / Criminal History");
@@ -237,7 +237,7 @@ function buildPdfPages(data) {
     ["Reliable transportation", value(data, "reliableTransportation")]
   ]);
   pdf.fieldRow([
-    ["Valid driver's license", ""],
+    ["Valid driver's license", value(data, "validDriversLicense")],
     ["Able to assist with personal care tasks", value(data, "personalCareTasks")]
   ]);
   pdf.fieldRow([
@@ -277,7 +277,7 @@ function buildPdfPages(data) {
   pdf.section("Emergency Contact");
   pdf.fieldRow([
     ["Emergency Contact Name", value(data, "emergencyName")],
-    ["Relationship", ""]
+    ["Relationship", value(data, "emergencyRelationship")]
   ]);
   pdf.fieldRow([
     ["Emergency Contact Phone Number", value(data, "emergencyPhone")]

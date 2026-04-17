@@ -36,6 +36,15 @@
 
           <label for="address">Home Address <span>*</span></label>
           <textarea id="address" name="address" rows="3" autocomplete="street-address" required></textarea>
+
+          <label for="city">City <span>*</span></label>
+          <input id="city" name="city" autocomplete="address-level2" required>
+
+          <label for="state">State <span>*</span></label>
+          <input id="state" name="state" autocomplete="address-level1" required>
+
+          <label for="zipCode">ZIP Code <span>*</span></label>
+          <input id="zipCode" name="zipCode" autocomplete="postal-code" required>
         </section>
 
         <!-- Section 2: role interest and schedule availability -->
@@ -46,6 +55,15 @@
 
           <label for="availability">Availability <span>*</span></label>
           <textarea id="availability" name="availability" rows="4" placeholder="Example: Monday-Friday mornings, weekends, overnight shifts" required></textarea>
+
+          <label for="dateAvailable">Date Available to Start <span>*</span></label>
+          <input id="dateAvailable" name="dateAvailable" type="date" required>
+
+          <label for="daysAvailable">Days Available <span>*</span></label>
+          <input id="daysAvailable" name="daysAvailable" placeholder="Example: Monday, Wednesday, Friday; weekends" required>
+
+          <label for="preferredShifts">Preferred Shift(s) <span>*</span></label>
+          <input id="preferredShifts" name="preferredShifts" placeholder="Example: mornings, evenings, overnights" required>
         </section>
 
         <!-- Section 3: basic required qualifications -->
@@ -62,6 +80,12 @@
             <legend>Do you have reliable transportation? <span>*</span></legend>
             <label class="choice"><input type="radio" name="reliableTransportation" value="Yes" required> Yes</label>
             <label class="choice"><input type="radio" name="reliableTransportation" value="No"> No</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Do you have a valid driver's license? <span>*</span></legend>
+            <label class="choice"><input type="radio" name="validDriversLicense" value="Yes" required> Yes</label>
+            <label class="choice"><input type="radio" name="validDriversLicense" value="No"> No</label>
           </fieldset>
 
           <fieldset>
@@ -289,6 +313,9 @@
           <h2 id="emergencyTitle">Emergency Contact</h2>
           <label for="emergencyName">Emergency Contact Name <span>*</span></label>
           <input id="emergencyName" name="emergencyName" required>
+
+          <label for="emergencyRelationship">Emergency Contact Relationship <span>*</span></label>
+          <input id="emergencyRelationship" name="emergencyRelationship" required>
 
           <label for="emergencyPhone">Emergency Contact Phone Number <span>*</span></label>
           <input id="emergencyPhone" name="emergencyPhone" type="tel" autocomplete="tel" required>
