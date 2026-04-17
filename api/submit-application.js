@@ -310,7 +310,7 @@ async function sendEmail({ pdfBuffer }) {
 
   const { data, error } = await resend.emails.send({
     from: "onboarding@resend.dev",
-    to: "info@communityregenerativesolutiins.com",
+    to: "info@communityregenerativesolutions.com",
     subject: "New CRS Employment Application",
     html: "<p>New application submitted</p>",
     attachments: [
