@@ -5,7 +5,52 @@
 
 const PAGE = { width: 612, height: 792, margin: 42 };
 const FONT = { body: "F1", bold: "F2" };
-const JOB_DESCRIPTION_TEXT = "[PASTE YOUR TEXT HERE]";
+const JOB_DESCRIPTION_TEXT = [
+  "Overview",
+  "The PAS Attendant provides non-skilled, non-technical personal care services to clients in their homes. Services are delivered in accordance with the client's service plan and aim to support independence, safety, and daily functioning.",
+  "",
+  "Primary Responsibilities",
+  "The PAS Attendant may assist with the following tasks as authorized in the service plan:",
+  "Personal Care",
+  "- Bathing, grooming, and hygiene",
+  "- Dressing and undressing",
+  "- Toileting and incontinence care",
+  "- Mobility assistance and transfers",
+  "Daily Living Activities",
+  "- Meal preparation and feeding assistance",
+  "- Light housekeeping (laundry, dishes, cleaning client areas)",
+  "- Shopping and errands (if authorized)",
+  "Health-Related Tasks (Non-Skilled)",
+  "- Medication reminders (no administration)",
+  "- Observing and reporting changes in client condition",
+  "Companionship & Support",
+  "- Providing companionship and supervision",
+  "- Ensuring client safety at all times",
+  "",
+  "Prohibited Tasks",
+  "PAS Attendants may NOT:",
+  "- Perform skilled nursing tasks",
+  "- Administer medications",
+  "- Provide medical diagnoses or treatments",
+  "- Handle client finances (unless specifically authorized and documented)",
+  "",
+  "Minimum Qualifications",
+  "- Must be at least 18 years of age",
+  "- Must pass required background checks per HHSC regulations",
+  "- Ability to read, write, and communicate effectively in English",
+  "- Physically capable of performing job duties (lifting, bending, standing)",
+  "- Demonstrates reliability, professionalism, and compassion",
+  "",
+  "Training Requirements",
+  "- Completion of agency orientation prior to providing services",
+  "- Ongoing in-service training as required by CRS and HHSC",
+  "- Review and understanding of client rights, abuse, neglect, and exploitation reporting, infection control procedures, and confidentiality (HIPAA)",
+  "",
+  "Work Schedule",
+  "- Hours vary based on client needs and assigned schedule",
+  "- Must maintain punctuality and reliability",
+  "- Must notify supervisor of absences or schedule conflicts immediately"
+];
 
 function normalizePdfText(value) {
   if (value === true) return "Yes";
@@ -69,6 +114,10 @@ function createPdfContext() {
     pages.push(stream);
     stream = [];
     y = 732;
+  }
+
+  function pageBreak() {
+    addPage();
   }
 
   function ensure(spaceNeeded) {
@@ -135,12 +184,22 @@ function createPdfContext() {
   }
 
   function paragraph(textValue) {
-    const lines = wrapText(textValue, 95);
+    const sourceLines = Array.isArray(textValue) ? textValue : [textValue];
     const lineHeight = 11;
-    ensure(lines.length * lineHeight + 10);
-    lines.forEach((lineText) => {
-      text(lineText, PAGE.margin, y, 9);
-      y -= lineHeight;
+    sourceLines.forEach((sourceLine) => {
+      if (!sourceLine) {
+        y -= 6;
+        return;
+      }
+
+      const isHeading = !sourceLine.startsWith("-") && sourceLine.length < 45;
+      const x = sourceLine.startsWith("-") ? PAGE.margin + 10 : PAGE.margin;
+      const lines = wrapText(sourceLine, isHeading ? 80 : 95);
+      ensure(lines.length * lineHeight + 6);
+      lines.forEach((lineText) => {
+        text(lineText, x, y, 9, isHeading ? FONT.bold : FONT.body);
+        y -= lineHeight;
+      });
     });
     y -= 8;
   }
@@ -210,7 +269,7 @@ function createPdfContext() {
     return pages;
   }
 
-  return { title, section, fieldRow, fullField, paragraph, table, employmentBlock, finish };
+  return { title, section, fieldRow, fullField, paragraph, table, employmentBlock, pageBreak, finish };
 }
 
 function buildPdfPages(data) {
@@ -313,6 +372,7 @@ function buildPdfPages(data) {
     ["Date", value(data, "signatureDate")]
   ]);
 
+  pdf.pageBreak();
   pdf.section("Job Description Acknowledgment");
   pdf.paragraph(JOB_DESCRIPTION_TEXT);
   pdf.table(
