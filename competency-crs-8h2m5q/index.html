@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Community Regenerative Solutions | PAS Attendant Competency Evaluation</title>
+    <style>
+      :root {
+        --ink: #111111;
+        --paper: #ffffff;
+        --line: #111111;
+        --soft: #f3f3f3;
+        --error: #8b1f16;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #e9e9e9;
+        color: var(--ink);
+        line-height: 1.35;
+        margin: 0;
+        padding: 18px;
+      }
+
+      input,
+      textarea,
+      button {
+        font: inherit;
+      }
+
+      .sheet {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        margin: 0 auto;
+        max-width: 960px;
+        padding: 28px;
+      }
+
+      .sheet-header {
+        border-bottom: 2px solid var(--line);
+        margin-bottom: 18px;
+        padding-bottom: 14px;
+        text-align: center;
+      }
+
+      .sheet-header h1 {
+        font-size: 1.45rem;
+        line-height: 1.25;
+        margin: 0;
+        text-transform: uppercase;
+      }
+
+      .sheet-header p {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 4px 0 0;
+        text-transform: uppercase;
+      }
+
+      .top-fields,
+      .signature-grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-bottom: 18px;
+      }
+
+      .line-field {
+        align-items: end;
+        display: grid;
+        gap: 5px;
+      }
+
+      label,
+      .field-label {
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      input[type="text"],
+      input[type="date"],
+      textarea {
+        background: #ffffff;
+        border: 0;
+        border-bottom: 1px solid var(--line);
+        border-radius: 0;
+        min-height: 36px;
+        padding: 6px 4px;
+        width: 100%;
+      }
+
+      input[readonly] {
+        background: var(--soft);
+      }
+
+      textarea {
+        border: 1px solid var(--line);
+        min-height: 90px;
+        resize: vertical;
+      }
+
+      table {
+        border-collapse: collapse;
+        margin: 12px 0 18px;
+        table-layout: fixed;
+        width: 100%;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 8px;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--soft);
+        font-size: 0.78rem;
+        text-align: left;
+        text-transform: uppercase;
+      }
+
+      td {
+        font-size: 0.9rem;
+      }
+
+      .category {
+        font-weight: 700;
+      }
+
+      .check-cell {
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      .check-cell input {
+        height: 24px;
+        width: 24px;
+      }
+
+      .comments-cell textarea {
+        border: 0;
+        min-height: 72px;
+        padding: 0;
+      }
+
+      .overall-section,
+      .recommendation,
+      .submission-status,
+      .error-summary,
+      .success-message {
+        border: 1px solid var(--line);
+        margin-bottom: 18px;
+        padding: 12px;
+      }
+
+      .recommendation h2,
+      .overall-section h2 {
+        font-size: 0.95rem;
+        margin: 0 0 10px;
+        text-transform: uppercase;
+      }
+
+      .recommendation-options {
+        display: grid;
+        gap: 10px;
+      }
+
+      .recommendation-options label {
+        align-items: center;
+        display: grid;
+        gap: 10px;
+        grid-template-columns: 28px 1fr;
+        text-transform: none;
+      }
+
+      .recommendation-options input {
+        height: 24px;
+        width: 24px;
+      }
+
+      .submit-button {
+        background: #111111;
+        border: 0;
+        color: #ffffff;
+        cursor: pointer;
+        font-weight: 700;
+        min-height: 48px;
+        padding: 12px 18px;
+        width: 100%;
+      }
+
+      .submit-button:disabled {
+        background: #777777;
+        cursor: wait;
+      }
+
+      .error-summary,
+      .submission-status.error {
+        border-color: var(--error);
+        color: var(--error);
+        font-weight: 700;
+      }
+
+      .submission-status.info,
+      .success-message {
+        font-weight: 700;
+      }
+
+      .field-error {
+        outline: 2px solid var(--error);
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      @media (max-width: 760px) {
+        body {
+          padding: 8px;
+        }
+
+        .sheet {
+          padding: 16px;
+        }
+
+        .top-fields,
+        .signature-grid {
+          grid-template-columns: 1fr;
+        }
+
+        table,
+        thead,
+        tbody,
+        th,
+        td,
+        tr {
+          display: block;
+        }
+
+        thead {
+          display: none;
+        }
+
+        tr {
+          border: 1px solid var(--line);
+          margin-bottom: 12px;
+        }
+
+        td {
+          border: 0;
+          border-bottom: 1px solid #cfcfcf;
+        }
+
+        td::before {
+          content: attr(data-label);
+          display: block;
+          font-size: 0.74rem;
+          font-weight: 700;
+          margin-bottom: 4px;
+          text-transform: uppercase;
+        }
+
+        .check-cell {
+          text-align: left;
+        }
+      }
+
+      @media print {
+        body {
+          background: #ffffff;
+          padding: 0;
+        }
+
+        .sheet {
+          border: 0;
+          max-width: none;
+          padding: 0;
+        }
+
+        .submit-button,
+        .submission-status,
+        .error-summary,
+        .success-message {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="sheet">
+      <header class="sheet-header">
+        <h1>Community Regenerative Solutions</h1>
+        <p>PAS Attendant Competency Evaluation</p>
+      </header>
+
+      <form id="competencyForm" method="POST" action="/api/submit-competency" novalidate>
+        <div id="errorSummary" class="error-summary" tabindex="-1" hidden></div>
+
+        <section class="top-fields" aria-label="Evaluation information">
+          <div class="line-field">
+            <label for="employeeFullName">Employee Name <span>*</span></label>
+            <input id="employeeFullName" name="employeeFullName" type="text" required>
+          </div>
+
+          <div class="line-field">
+            <span class="field-label">Job Title</span>
+            <input name="jobTitle" type="text" value="PAS Attendant" readonly>
+          </div>
+
+          <div class="line-field">
+            <label for="evaluatorName">Evaluator / Supervisor Name <span>*</span></label>
+            <input id="evaluatorName" name="evaluatorName" type="text" required>
+          </div>
+
+          <div class="line-field">
+            <label for="evaluationDate">Evaluation Date <span>*</span></label>
+            <input id="evaluationDate" name="evaluationDate" type="date" required>
+          </div>
+        </section>
+
+        <table aria-label="Competency scoring table">
+          <thead>
+            <tr>
+              <th style="width: 18%;">Category</th>
+              <th style="width: 34%;">Criteria</th>
+              <th style="width: 10%;">Competent</th>
+              <th style="width: 14%;">Needs Improvement</th>
+              <th style="width: 24%;">Comments</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Category" class="category">Personal Care Assistance</td>
+              <td data-label="Criteria">Demonstrates ability to assist with bathing, grooming, dressing, and hygiene safely and respectfully.</td>
+              <td data-label="Competent" class="check-cell"><input type="checkbox" name="personalCareCompetent" data-competency-group="personalCare"></td>
+              <td data-label="Needs Improvement" class="check-cell"><input type="checkbox" name="personalCareNeedsImprovement" data-competency-group="personalCare"></td>
+              <td data-label="Comments" class="comments-cell"><textarea name="personalCareComments" aria-label="Personal Care Assistance comments"></textarea></td>
+            </tr>
+
+            <tr>
+              <td data-label="Category" class="category">Mobility / Transfers</td>
+              <td data-label="Criteria">Demonstrates safe assistance with ambulation, positioning, and transfers within assigned scope.</td>
+              <td data-label="Competent" class="check-cell"><input type="checkbox" name="mobilityTransfersCompetent" data-competency-group="mobilityTransfers"></td>
+              <td data-label="Needs Improvement" class="check-cell"><input type="checkbox" name="mobilityTransfersNeedsImprovement" data-competency-group="mobilityTransfers"></td>
+              <td data-label="Comments" class="comments-cell"><textarea name="mobilityTransfersComments" aria-label="Mobility / Transfers comments"></textarea></td>
+            </tr>
+
+            <tr>
+              <td data-label="Category" class="category">Toileting / Incontinence Care</td>
+              <td data-label="Criteria">Demonstrates proper assistance with toileting and incontinence care while maintaining dignity and cleanliness.</td>
+              <td data-label="Competent" class="check-cell"><input type="checkbox" name="toiletingCareCompetent" data-competency-group="toiletingCare"></td>
+              <td data-label="Needs Improvement" class="check-cell"><input type="checkbox" name="toiletingCareNeedsImprovement" data-competency-group="toiletingCare"></td>
+              <td data-label="Comments" class="comments-cell"><textarea name="toiletingCareComments" aria-label="Toileting / Incontinence Care comments"></textarea></td>
+            </tr>
+
+            <tr>
+              <td data-label="Category" class="category">Meal Preparation</td>
+              <td data-label="Criteria">Demonstrates ability to prepare meals and assist with feeding as authorized.</td>
+              <td data-label="Competent" class="check-cell"><input type="checkbox" name="mealPreparationCompetent" data-competency-group="mealPreparation"></td>
+              <td data-label="Needs Improvement" class="check-cell"><input type="checkbox" name="mealPreparationNeedsImprovement" data-competency-group="mealPreparation"></td>
+              <td data-label="Comments" class="comments-cell"><textarea name="mealPreparationComments" aria-label="Meal Preparation comments"></textarea></td>
+            </tr>
+
+            <tr>
+              <td data-label="Category" class="category">Light Housekeeping</td>
+              <td data-label="Criteria">Demonstrates ability to complete assigned household tasks in client care areas.</td>
+              <td data-label="Competent" class="check-cell"><input type="checkbox" name="lightHousekeepingCompetent" data-competency-group="lightHousekeeping"></td>
+              <td data-label="Needs Improvement" class="check-cell"><input type="checkbox" name="lightHousekeepingNeedsImprovement" data-competency-group="lightHousekeeping"></td>
+              <td data-label="Comments" class="comments-cell"><textarea name="lightHousekeepingComments" aria-label="Light Housekeeping comments"></textarea></td>
+            </tr>
+
+            <tr>
+              <td data-label="Category" class="category">Infection Control</td>
+              <td data-label="Criteria">Demonstrates proper handwashing, glove use, and infection control practices.</td>
+              <td data-label="Competent" class="check-cell"><input type="checkbox" name="infectionControlCompetent" data-competency-group="infectionControl"></td>
+              <td data-label="Needs Improvement" class="check-cell"><input type="checkbox" name="infectionControlNeedsImprovement" data-competency-group="infectionControl"></td>
+              <td data-label="Comments" class="comments-cell"><textarea name="infectionControlComments" aria-label="Infection Control comments"></textarea></td>
+            </tr>
+
+            <tr>
+              <td data-label="Category" class="category">Documentation / Reporting</td>
+              <td data-label="Criteria">Demonstrates understanding of accurate documentation and reporting changes in client condition.</td>
+              <td data-label="Competent" class="check-cell"><input type="checkbox" name="documentationReportingCompetent" data-competency-group="documentationReporting"></td>
+              <td data-label="Needs Improvement" class="check-cell"><input type="checkbox" name="documentationReportingNeedsImprovement" data-competency-group="documentationReporting"></td>
+              <td data-label="Comments" class="comments-cell"><textarea name="documentationReportingComments" aria-label="Documentation / Reporting comments"></textarea></td>
+            </tr>
+
+            <tr>
+              <td data-label="Category" class="category">Professionalism / Communication</td>
+              <td data-label="Criteria">Demonstrates respectful communication, punctuality, and appropriate interaction with clients and supervisors.</td>
+              <td data-label="Competent" class="check-cell"><input type="checkbox" name="professionalismCommunicationCompetent" data-competency-group="professionalismCommunication"></td>
+              <td data-label="Needs Improvement" class="check-cell"><input type="checkbox" name="professionalismCommunicationNeedsImprovement" data-competency-group="professionalismCommunication"></td>
+              <td data-label="Comments" class="comments-cell"><textarea name="professionalismCommunicationComments" aria-label="Professionalism / Communication comments"></textarea></td>
+            </tr>
+
+            <tr>
+              <td data-label="Category" class="category">Client Safety Awareness</td>
+              <td data-label="Criteria">Demonstrates awareness of fall prevention, environmental safety, and emergency response expectations.</td>
+              <td data-label="Competent" class="check-cell"><input type="checkbox" name="clientSafetyCompetent" data-competency-group="clientSafety"></td>
+              <td data-label="Needs Improvement" class="check-cell"><input type="checkbox" name="clientSafetyNeedsImprovement" data-competency-group="clientSafety"></td>
+              <td data-label="Comments" class="comments-cell"><textarea name="clientSafetyComments" aria-label="Client Safety Awareness comments"></textarea></td>
+            </tr>
+
+            <tr>
+              <td data-label="Category" class="category">Prohibited Tasks</td>
+              <td data-label="Criteria">Demonstrates understanding of tasks not allowed, including no skilled nursing tasks and no medication administration.</td>
+              <td data-label="Competent" class="check-cell"><input type="checkbox" name="prohibitedTasksCompetent" data-competency-group="prohibitedTasks"></td>
+              <td data-label="Needs Improvement" class="check-cell"><input type="checkbox" name="prohibitedTasksNeedsImprovement" data-competency-group="prohibitedTasks"></td>
+              <td data-label="Comments" class="comments-cell"><textarea name="prohibitedTasksComments" aria-label="Prohibited Tasks comments"></textarea></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <section class="overall-section">
+          <h2>Overall Comments</h2>
+          <textarea id="overallComments" name="overallComments"></textarea>
+        </section>
+
+        <section class="recommendation" aria-labelledby="recommendationTitle">
+          <h2 id="recommendationTitle">Recommendation</h2>
+          <div class="recommendation-options">
+            <label><input type="checkbox" name="recommendationCompetent" data-recommendation> Competent for Assignment</label>
+            <label><input type="checkbox" name="recommendationNeedsTraining" data-recommendation> Needs Additional Training Before Assignment</label>
+          </div>
+        </section>
+
+        <section class="signature-grid" aria-label="Evaluator signature section">
+          <div class="line-field">
+            <label for="certifierName">Evaluator Name <span>*</span></label>
+            <input id="certifierName" name="certifierName" type="text" required>
+          </div>
+
+          <div class="line-field">
+            <label for="certifierSignature">Evaluator Signature <span>*</span></label>
+            <input id="certifierSignature" name="certifierSignature" type="text" required>
+          </div>
+
+          <div class="line-field">
+            <label for="certificationDate">Date <span>*</span></label>
+            <input id="certificationDate" name="certificationDate" type="date" required>
+          </div>
+        </section>
+
+        <div id="submissionStatus" class="submission-status" role="status" aria-live="polite" hidden></div>
+        <button class="submit-button" type="submit">Submit Competency Evaluation</button>
+      </form>
+
+      <section id="successMessage" class="success-message" hidden tabindex="-1">
+        <h2>The competency evaluation has been submitted successfully.</h2>
+        <p>The completed PDF has been sent to Community Regenerative Solutions.</p>
+      </section>
+    </main>
+
+    <script src="../src/competency.js"></script>
+  </body>
+</html>
