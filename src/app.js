@@ -6,7 +6,7 @@ const experienceDetails = document.querySelector("#experienceDetails");
 const felonyExplanationGroup = document.querySelector("#felonyExplanationGroup");
 const felonyExplanation = document.querySelector("#felonyExplanation");
 const signatureDate = document.querySelector("#signatureDate");
-const jobDescriptionDate = document.querySelector("#jobDescriptionDate");
+const finalAcknowledgmentDate = document.querySelector("#finalAcknowledgmentDate");
 const downloadPdfLink = document.querySelector("#downloadPdfLink");
 const submitButton = form.querySelector(".submit-button");
 const submissionStatus = document.querySelector("#submissionStatus");
@@ -26,7 +26,7 @@ function configureFormSubmissionAttributes() {
 
 // Set today's date as a convenience. The applicant can still change it.
 signatureDate.value = new Date().toISOString().slice(0, 10);
-jobDescriptionDate.value = new Date().toISOString().slice(0, 10);
+finalAcknowledgmentDate.value = new Date().toISOString().slice(0, 10);
 
 // These labels make validation messages clear for nontechnical applicants.
 const fieldLabels = {
@@ -73,9 +73,15 @@ const fieldLabels = {
   signature: "Signature",
   signatureDate: "Date",
   jobDescriptionAcknowledged: "Job Description Acknowledgment checkbox",
-  jobDescriptionFullName: "Job Description Acknowledgment Full Name",
-  jobDescriptionSignature: "Job Description Acknowledgment Signature",
-  jobDescriptionDate: "Job Description Acknowledgment Date"
+  confidentialityAcknowledged: "Confidentiality and HIPAA acknowledgment",
+  backgroundCheckAcknowledged: "Background check authorization",
+  aneAcknowledged: "Abuse, neglect, and exploitation reporting acknowledgment",
+  clientRightsAcknowledged: "Client rights acknowledgment",
+  atWillAcknowledged: "At-will employment acknowledgment",
+  attendanceAcknowledged: "Attendance and reliability policy acknowledgment",
+  finalAcknowledgmentFullName: "Final Acknowledgment Full Name",
+  finalAcknowledgmentSignature: "Final Acknowledgment Signature",
+  finalAcknowledgmentDate: "Final Acknowledgment Date"
 };
 
 const emailSections = [
@@ -190,10 +196,26 @@ const emailSections = [
   {
     title: "Job Description Acknowledgment",
     rows: [
-      ["Acknowledgment Checked", "jobDescriptionAcknowledged"],
-      ["Full Name", "jobDescriptionFullName"],
-      ["Signature", "jobDescriptionSignature"],
-      ["Date", "jobDescriptionDate"]
+      ["Acknowledgment Checked", "jobDescriptionAcknowledged"]
+    ]
+  },
+  {
+    title: "Additional Applicant Acknowledgments",
+    rows: [
+      ["Confidentiality and HIPAA Agreement", "confidentialityAcknowledged"],
+      ["Background Check Authorization", "backgroundCheckAcknowledged"],
+      ["ANE Reporting", "aneAcknowledged"],
+      ["Client Rights Acknowledgment", "clientRightsAcknowledged"],
+      ["At-Will Employment Statement", "atWillAcknowledged"],
+      ["Attendance and Reliability Policy", "attendanceAcknowledged"]
+    ]
+  },
+  {
+    title: "Final Acknowledgment",
+    rows: [
+      ["Typed Full Name", "finalAcknowledgmentFullName"],
+      ["Signature", "finalAcknowledgmentSignature"],
+      ["Date", "finalAcknowledgmentDate"]
     ]
   }
 ];

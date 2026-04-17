@@ -49,6 +49,39 @@ const JOB_DESCRIPTION_TEXT = [
   "- Must notify supervisor of absences or schedule conflicts immediately"
 ];
 
+const ACKNOWLEDGMENT_SECTIONS = [
+  {
+    title: "Confidentiality & HIPAA Agreement",
+    field: "confidentialityAcknowledged",
+    text: "I understand that client information is private and confidential. I agree to protect personal, health, and service-related information and to follow CRS confidentiality and HIPAA expectations."
+  },
+  {
+    title: "Background Check Authorization",
+    field: "backgroundCheckAcknowledged",
+    text: "I authorize Community Regenerative Solutions to complete required background, registry, and employment-related checks as part of the application and hiring process, to the extent permitted by law."
+  },
+  {
+    title: "Abuse, Neglect, and Exploitation (ANE) Reporting",
+    field: "aneAcknowledged",
+    text: "I understand that abuse, neglect, and exploitation must be reported according to agency policy and applicable Texas requirements. I agree to follow reporting procedures immediately if concerns arise."
+  },
+  {
+    title: "Client Rights Acknowledgment",
+    field: "clientRightsAcknowledged",
+    text: "I understand that clients have rights to dignity, respect, privacy, choice, and safe care. I agree to support and protect client rights while providing services."
+  },
+  {
+    title: "At-Will Employment Statement",
+    field: "atWillAcknowledged",
+    text: "I understand that employment with Community Regenerative Solutions is at will, unless otherwise stated in a written agreement signed by authorized agency leadership."
+  },
+  {
+    title: "Attendance & Reliability Policy",
+    field: "attendanceAcknowledged",
+    text: "I understand that reliable attendance and timely communication are essential to client safety and service continuity. I agree to follow agency procedures for schedules, absences, and call-offs."
+  }
+];
+
 function normalizeText(value) {
   if (value === true) return "Yes";
   if (value === false) return "No";
@@ -375,10 +408,23 @@ function buildPdfPages(data) {
     [["I have read and understand the duties and responsibilities of the Personal Assistance Services (PAS) Attendant position.", checked(data.jobDescriptionAcknowledged)]],
     [440, 90]
   );
+
+  ACKNOWLEDGMENT_SECTIONS.forEach((section) => {
+    pdf.section(section.title);
+    pdf.paragraph(section.text);
+    pdf.table(
+      ["Acknowledgment", "Checked"],
+      [["I acknowledge and agree", checked(data[section.field])]],
+      [440, 90]
+    );
+  });
+
+  pdf.section("Final Acknowledgment");
+  pdf.paragraph("By signing below, I confirm that I have read, understand, and agree to all sections above, including the employment application, job description, and all acknowledgments.");
   pdf.fieldRow([
-    ["Full Name", value(data, "jobDescriptionFullName")],
-    ["Signature", value(data, "jobDescriptionSignature")],
-    ["Date", value(data, "jobDescriptionDate")]
+    ["Typed Full Name", value(data, "finalAcknowledgmentFullName")],
+    ["Signature", value(data, "finalAcknowledgmentSignature")],
+    ["Date", value(data, "finalAcknowledgmentDate")]
   ]);
 
   return pdf.finish();

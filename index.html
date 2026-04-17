@@ -433,15 +433,74 @@
             <input type="checkbox" name="jobDescriptionAcknowledged" required>
             <span>I have read and understand the duties and responsibilities of the Personal Assistance Services (PAS) Attendant position.</span>
           </label>
+        </section>
 
-          <label for="jobDescriptionFullName">Full Name <span>*</span></label>
-          <input id="jobDescriptionFullName" name="jobDescriptionFullName" required>
+        <section class="form-section" aria-labelledby="confidentialityTitle">
+          <h2 id="confidentialityTitle">Confidentiality &amp; HIPAA Agreement</h2>
+          <p class="helper-note">I understand that client information is private and confidential. I agree to protect all personal, health, and service-related information and to follow Community Regenerative Solutions confidentiality and HIPAA expectations.</p>
+          <label class="choice checkbox-choice">
+            <input type="checkbox" name="confidentialityAcknowledged" required>
+            <span>I acknowledge and agree</span>
+          </label>
+        </section>
 
-          <label for="jobDescriptionSignature">Signature <span>*</span></label>
-          <input id="jobDescriptionSignature" name="jobDescriptionSignature" placeholder="Type your full legal name" required>
+        <section class="form-section" aria-labelledby="backgroundCheckTitle">
+          <h2 id="backgroundCheckTitle">Background Check Authorization</h2>
+          <p class="helper-note">I authorize Community Regenerative Solutions to complete required background, registry, and employment-related checks as permitted by law and agency policy.</p>
+          <label class="choice checkbox-choice">
+            <input type="checkbox" name="backgroundCheckAcknowledged" required>
+            <span>I acknowledge and agree</span>
+          </label>
+        </section>
 
-          <label for="jobDescriptionDate">Date <span>*</span></label>
-          <input id="jobDescriptionDate" name="jobDescriptionDate" type="date" required>
+        <section class="form-section" aria-labelledby="aneTitle">
+          <h2 id="aneTitle">Abuse, Neglect, and Exploitation (ANE) Reporting</h2>
+          <p class="helper-note">I understand that abuse, neglect, and exploitation must be reported according to applicable requirements. I agree to follow agency procedures for reporting concerns immediately.</p>
+          <label class="choice checkbox-choice">
+            <input type="checkbox" name="aneAcknowledged" required>
+            <span>I acknowledge and agree</span>
+          </label>
+        </section>
+
+        <section class="form-section" aria-labelledby="clientRightsTitle">
+          <h2 id="clientRightsTitle">Client Rights Acknowledgment</h2>
+          <p class="helper-note">I understand that clients have the right to dignity, respect, privacy, choice, safety, and services delivered according to the service plan. I agree to respect and support client rights at all times.</p>
+          <label class="choice checkbox-choice">
+            <input type="checkbox" name="clientRightsAcknowledged" required>
+            <span>I acknowledge and agree</span>
+          </label>
+        </section>
+
+        <section class="form-section" aria-labelledby="atWillTitle">
+          <h2 id="atWillTitle">At-Will Employment Statement</h2>
+          <p class="helper-note">I understand that employment with Community Regenerative Solutions is at-will unless otherwise stated in writing. Either I or the agency may end employment at any time, with or without cause, as permitted by law.</p>
+          <label class="choice checkbox-choice">
+            <input type="checkbox" name="atWillAcknowledged" required>
+            <span>I acknowledge and agree</span>
+          </label>
+        </section>
+
+        <section class="form-section" aria-labelledby="attendanceTitle">
+          <h2 id="attendanceTitle">Attendance &amp; Reliability Policy</h2>
+          <p class="helper-note">I understand that punctuality, reliability, and timely communication are essential to client safety and service continuity. I agree to follow assigned schedules and notify my supervisor immediately of absences or schedule conflicts.</p>
+          <label class="choice checkbox-choice">
+            <input type="checkbox" name="attendanceAcknowledged" required>
+            <span>I acknowledge and agree</span>
+          </label>
+        </section>
+
+        <section class="form-section" aria-labelledby="finalAcknowledgmentTitle">
+          <h2 id="finalAcknowledgmentTitle">Final Acknowledgment</h2>
+          <p class="helper-note">By signing below, I confirm that I have read, understand, and agree to all sections above, including the employment application, job description, confidentiality expectations, background check authorization, ANE reporting requirements, client rights, at-will employment statement, and attendance and reliability policy.</p>
+
+          <label for="finalAcknowledgmentFullName">Full Name <span>*</span></label>
+          <input id="finalAcknowledgmentFullName" name="finalAcknowledgmentFullName" required>
+
+          <label for="finalAcknowledgmentSignature">Signature <span>*</span></label>
+          <input id="finalAcknowledgmentSignature" name="finalAcknowledgmentSignature" placeholder="Type your full legal name" required>
+
+          <label for="finalAcknowledgmentDate">Date <span>*</span></label>
+          <input id="finalAcknowledgmentDate" name="finalAcknowledgmentDate" type="date" required>
         </section>
 
         <div id="submissionStatus" class="submission-status" role="status" aria-live="polite" hidden></div>
