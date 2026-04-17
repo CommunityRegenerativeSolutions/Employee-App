@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Community Regenerative Solutions | Orientation & Training Packet</title>
+    <link rel="stylesheet" href="../assets/styles.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="form-header">
+        <p class="eyebrow">Private CRS Packet</p>
+        <h1>Community Regenerative Solutions</h1>
+        <p>Orientation &amp; Training Packet</p>
+      </header>
+
+      <section class="notice" aria-label="Form instructions">
+        <p>This packet documents required orientation and training before an employee provides services for Community Regenerative Solutions. Please review each section carefully, acknowledge each topic, and complete the final signature section at the bottom.</p>
+      </section>
+
+      <!-- Private direct-link form. This page is not linked from the public site. -->
+      <form id="orientationForm" class="application-form" method="POST" action="/api/submit-orientation" enctype="application/x-www-form-urlencoded" novalidate>
+        <div id="errorSummary" class="error-summary" tabindex="-1" hidden></div>
+
+        <section class="form-section" aria-labelledby="employeeInfoTitle">
+          <h2 id="employeeInfoTitle">Employee Information</h2>
+
+          <label for="fullName">Full Legal Name <span>*</span></label>
+          <input id="fullName" name="fullName" autocomplete="name" required>
+
+          <label for="email">Email Address <span>*</span></label>
+          <input id="email" name="email" type="email" autocomplete="email" required>
+
+          <label for="phone">Phone Number <span>*</span></label>
+          <input id="phone" name="phone" type="tel" autocomplete="tel" required>
+
+        </section>
+
+        <section class="form-section" aria-labelledby="trainingTitle">
+          <h2 id="trainingTitle">Orientation &amp; Training Review</h2>
+          <p class="helper-note">Each topic below should be reviewed before the employee begins providing PAS services.</p>
+
+          <fieldset class="subsection">
+            <legend>Agency Policies and Employee Expectations</legend>
+            <p>Employees are expected to follow all Community Regenerative Solutions (CRS) policies and procedures at all times. This includes maintaining professionalism, respecting clients, following assigned schedules, and completing all required documentation accurately and on time. Employees must perform only tasks authorized in the client’s service plan and follow all supervisory instructions. Employees are expected to present themselves in a clean and appropriate manner and maintain a respectful attitude in all interactions.</p>
+            <p>Failure to follow agency policies, repeated tardiness, unprofessional behavior, or refusal to follow instructions may result in disciplinary action up to and including termination. Employees must also cooperate with supervisors, participate in required training, and uphold the standards of care expected by CRS and Texas HHSC. Employees are responsible for understanding their role and asking questions when unsure about expectations. Maintaining accountability and consistency in performance is required for continued employment.</p>
+            <p>Employees must also protect agency property, maintain appropriate boundaries with clients, and avoid any conflicts of interest. All work must be performed honestly and ethically. Employees are expected to represent CRS in a professional manner at all times, both on and off duty when interacting with clients or their families.</p>
+            <label class="choice checkbox-choice">
+              <input type="checkbox" name="agencyPoliciesReviewed" required>
+              <span>I reviewed and understand this section</span>
+            </label>
+          </fieldset>
+
+          <fieldset class="subsection">
+            <legend>Confidentiality and HIPAA</legend>
+            <p>All client information is confidential and must be protected in accordance with HIPAA regulations. Employees may only access or share client information as necessary to perform job duties. Discussing client information in public, with unauthorized individuals, or on social media is strictly prohibited. This includes avoiding conversations about clients in public places such as stores, restaurants, or with family and friends.</p>
+            <p>Employees must protect all written, verbal, and electronic information. Any suspected breach of confidentiality must be reported immediately to a supervisor. Violations of confidentiality policies may result in disciplinary action and potential legal consequences. Employees must ensure that documents containing client information are stored securely and not left unattended.</p>
+            <p>Electronic communication, including text messages and emails, must be handled carefully and only used when authorized. Employees must not take photos or recordings of clients without proper authorization. Protecting client privacy is a core responsibility and must be taken seriously at all times.</p>
+            <label class="choice checkbox-choice">
+              <input type="checkbox" name="confidentialityReviewed" required>
+              <span>I reviewed and understand this section</span>
+            </label>
+          </fieldset>
+
+          <fieldset class="subsection">
+            <legend>Abuse, Neglect, and Exploitation Reporting</legend>
+            <p>Employees are required to immediately report any suspected abuse, neglect, or exploitation of a client. This includes physical, emotional, verbal, or financial harm, as well as failure to provide necessary care. Employees must remain alert to signs such as unexplained injuries, sudden behavioral changes, or unsafe living conditions.</p>
+            <p>Reports must be made to a supervisor and to the appropriate state reporting hotline as required by Texas HHSC regulations. Employees are protected from retaliation when making a good faith report. Failure to report suspected abuse, neglect, or exploitation may result in serious disciplinary action, including termination. Employees must not attempt to investigate or resolve suspected abuse on their own.</p>
+            <p>All reports should be made as soon as possible to ensure the safety of the client. Employees should document observations clearly and accurately when reporting concerns. The safety and protection of clients is a top priority and must never be delayed.</p>
+            <label class="choice checkbox-choice">
+              <input type="checkbox" name="aneReviewed" required>
+              <span>I reviewed and understand this section</span>
+            </label>
+          </fieldset>
+
+          <fieldset class="subsection">
+            <legend>Client Rights, Dignity, and Respectful Care</legend>
+            <p>Clients have the right to be treated with dignity, respect, and privacy at all times. Employees must honor client preferences, promote independence, and avoid any behavior that could be considered disrespectful, abusive, or discriminatory. Care must be provided in a manner that supports the client’s physical, emotional, and personal well-being.</p>
+            <p>Employees must respect cultural differences, personal beliefs, and lifestyle choices of each client. Clients have the right to make decisions about their care, and employees must not force or pressure clients into actions against their wishes. Maintaining a respectful and professional relationship is required at all times. Employees must also ensure privacy during personal care tasks.</p>
+            <p>Any concerns related to client rights must be reported to a supervisor. Employees should encourage independence while ensuring safety. Treating clients with dignity is a fundamental expectation of all CRS staff.</p>
+            <label class="choice checkbox-choice">
+              <input type="checkbox" name="clientRightsReviewed" required>
+              <span>I reviewed and understand this section</span>
+            </label>
+          </fieldset>
+
+          <fieldset class="subsection">
+            <legend>Infection Control and Universal Precautions</legend>
+            <p>Employees must follow standard infection control practices, including proper handwashing, use of gloves when appropriate, and maintaining a clean environment. Universal precautions must be used when exposure to bodily fluids is possible to protect both the employee and the client. Employees must follow all guidelines for preventing the spread of illness and infection.</p>
+            <p>Proper disposal of waste, cleaning of surfaces, and personal hygiene are essential components of infection control. Employees should not report to work when experiencing symptoms of illness that could be transmitted to clients. Any exposure incidents or concerns must be reported to a supervisor immediately. Employees must follow any additional infection control guidance provided by the agency.</p>
+            <p>Employees should also be aware of common infection risks in the home environment. Maintaining cleanliness and using protective equipment when necessary helps reduce the spread of illness. Infection control is an ongoing responsibility during every shift.</p>
+            <label class="choice checkbox-choice">
+              <input type="checkbox" name="infectionControlReviewed" required>
+              <span>I reviewed and understand this section</span>
+            </label>
+          </fieldset>
+
+          <fieldset class="subsection">
+            <legend>Emergency Procedures and Reporting Expectations</legend>
+            <p>In the event of an emergency, employees must ensure the client’s immediate safety and contact emergency services (911) if necessary. Employees should remain calm, provide basic assistance within their scope, and follow any instructions provided by emergency personnel. Protecting the client from further harm is the top priority.</p>
+            <p>All incidents must be reported to a supervisor as soon as possible following the emergency. Employees must follow agency procedures for documenting and reporting emergencies, including completing any required incident reports. Timely and accurate reporting is critical for ensuring proper follow-up and compliance. Employees must not leave a client unattended during an emergency unless directed by emergency personnel.</p>
+            <p>Employees should be familiar with the client’s environment and any known risks. Knowing how to respond quickly and appropriately can prevent further harm. Following proper procedures ensures both safety and compliance.</p>
+            <label class="choice checkbox-choice">
+              <input type="checkbox" name="emergencyProceduresReviewed" required>
+              <span>I reviewed and understand this section</span>
+            </label>
+          </fieldset>
+
+          <fieldset class="subsection">
+            <legend>Documentation and Timesheet Expectations</legend>
+            <p>Employees are responsible for accurately documenting all services provided. Timesheets and visit records must reflect actual hours worked and tasks completed. Documentation must be clear, complete, and submitted according to agency requirements. Accurate records are necessary for compliance, billing, and quality of care.</p>
+            <p>Falsification of documentation, including incorrect times or services not provided, is strictly prohibited. Employees must not sign in or out for another employee or submit inaccurate information. Any questions regarding documentation must be directed to a supervisor. Employees must ensure all entries are truthful and completed in a timely manner.</p>
+            <p>Late or incomplete documentation may affect service delivery and agency compliance. Employees must follow all EVV or documentation requirements as assigned. Maintaining accurate records is a critical part of the job.</p>
+            <label class="choice checkbox-choice">
+              <input type="checkbox" name="documentationReviewed" required>
+              <span>I reviewed and understand this section</span>
+            </label>
+          </fieldset>
+
+          <fieldset class="subsection">
+            <legend>Call-Off, Attendance, and Schedule Communication</legend>
+            <p>Employees must report absences, lateness, or scheduling conflicts to their supervisor as soon as possible. Reliable attendance is essential to ensure continuity of care for clients. Employees are expected to arrive on time and be prepared to perform assigned duties.</p>
+            <p>Repeated absences, failure to notify the supervisor, or frequent tardiness may result in disciplinary action. Employees must follow agency procedures for requesting time off and communicating schedule changes. Clear and timely communication is required at all times. Employees must not abandon a shift without proper notice.</p>
+            <p>Consistent attendance reflects professionalism and reliability. Employees must understand the impact of missed shifts on clients. Maintaining communication with supervisors is required at all times.</p>
+            <label class="choice checkbox-choice">
+              <input type="checkbox" name="callOffReviewed" required>
+              <span>I reviewed and understand this section</span>
+            </label>
+          </fieldset>
+
+          <fieldset class="subsection">
+            <legend>Service Plan, Task List, and Supervisor Communication</legend>
+            <p>Employees must follow the client’s authorized service plan and only perform approved tasks. Services provided must match what has been authorized and documented. Employees must not add, remove, or change services without proper approval from the agency.</p>
+            <p>Any changes in the client’s condition, environment, or needs must be reported to a supervisor immediately. Employees must maintain communication with supervisors regarding concerns, incidents, or questions. Following the service plan ensures compliance and client safety. Employees must not accept instructions from unauthorized individuals that conflict with the service plan.</p>
+            <p>Supervisors are responsible for approving any changes to care. Employees must document and communicate clearly. Adhering to the service plan is a key part of compliance.</p>
+            <label class="choice checkbox-choice">
+              <input type="checkbox" name="servicePlanReviewed" required>
+              <span>I reviewed and understand this section</span>
+            </label>
+          </fieldset>
+
+          <fieldset class="subsection">
+            <legend>Prohibited Tasks</legend>
+            <p>PAS Attendants are not permitted to perform skilled nursing services. This includes administering medications, providing medical treatments, or making medical decisions. Employees may only provide non-skilled personal care services as authorized in the service plan.</p>
+            <p>Employees must not perform tasks they have not been trained or authorized to perform. If a client requests a task outside of the employee’s scope, the employee must politely decline and report the request to a supervisor. Following these limitations protects both the employee and the client. Performing unauthorized tasks may result in disciplinary action.</p>
+            <p>Employees must always stay within their role and responsibilities. When in doubt, they must contact a supervisor before proceeding. Maintaining proper boundaries ensures safety and compliance.</p>
+            <label class="choice checkbox-choice">
+              <input type="checkbox" name="prohibitedTasksReviewed" required>
+              <span>I reviewed and understand this section</span>
+            </label>
+          </fieldset>
+        </section>
+
+        <section class="form-section" aria-labelledby="employeeQuestionsTitle">
+          <h2 id="employeeQuestionsTitle">Questions or Notes</h2>
+          <label for="questions">Questions, comments, or topics needing follow-up</label>
+          <textarea id="questions" name="questions" rows="4"></textarea>
+        </section>
+
+        <section class="form-section" aria-labelledby="finalAcknowledgmentTitle">
+          <h2 id="finalAcknowledgmentTitle">Final Acknowledgment</h2>
+          <p class="helper-note">By signing below, I confirm that I have completed the orientation and training review above, understand the topics covered, and agree to follow Community Regenerative Solutions policies and procedures.</p>
+
+          <label for="finalFullName">Full Legal Name <span>*</span></label>
+          <input id="finalFullName" name="finalFullName" required>
+
+          <label for="signature">Signature <span>*</span></label>
+          <input id="signature" name="signature" placeholder="Type your full legal name" required>
+
+          <label for="orientationDate">Orientation Date <span>*</span></label>
+          <input id="orientationDate" name="orientationDate" type="date" required>
+
+          <label for="trainerName">Trainer / Supervisor Name <span>*</span></label>
+          <input id="trainerName" name="trainerName" required>
+        </section>
+
+        <div id="submissionStatus" class="submission-status" role="status" aria-live="polite" hidden></div>
+        <button class="submit-button" type="submit">Submit Orientation Packet</button>
+      </form>
+
+      <section id="successMessage" class="success-message" hidden tabindex="-1">
+        <h2>Your orientation packet has been submitted successfully.</h2>
+        <p>Thank you for completing the Community Regenerative Solutions orientation packet.</p>
+      </section>
+    </main>
+
+    <script src="../src/orientation.js"></script>
+  </body>
+</html>
