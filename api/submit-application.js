@@ -375,7 +375,7 @@ async function sendEmail({ applicant, pdfBuffer }) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const { data, error } = await resend.emails.send({
     from: "onboarding@resend.dev",
-    to: "info@communityregenerativesolutiins.com",
+    to: "info@communityregenerativesolutions.com",
     subject: "New CRS Employment Application",
     html: "<p>New application submitted</p>",
     attachments: [
