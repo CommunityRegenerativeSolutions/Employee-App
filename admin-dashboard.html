@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Community Regenerative Solutions | Onboarding Dashboard</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+      .dashboard-shell {
+        max-width: 1100px;
+      }
+
+      .dashboard-toolbar {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+        margin: 16px 0;
+      }
+
+      .dashboard-toolbar p {
+        color: var(--muted);
+        font-weight: 800;
+        margin: 0;
+      }
+
+      .refresh-button {
+        background: var(--brand);
+        border: 0;
+        border-radius: 8px;
+        color: #ffffff;
+        cursor: pointer;
+        font-weight: 900;
+        min-height: 44px;
+        padding: 10px 14px;
+      }
+
+      .employee-grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      .employee-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--shadow-soft);
+        padding: 18px;
+      }
+
+      .employee-card header {
+        align-items: start;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+      }
+
+      .employee-card h2 {
+        color: var(--brand-dark);
+        font-size: 1.18rem;
+        line-height: 1.25;
+        margin: 0;
+      }
+
+      .employee-card small {
+        color: var(--muted);
+        display: block;
+        font-weight: 800;
+        margin-top: 3px;
+      }
+
+      .status-badge {
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 900;
+        padding: 6px 10px;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .status-ready {
+        background: var(--success-bg);
+        color: var(--success);
+      }
+
+      .status-pending {
+        background: var(--brand-soft);
+        color: var(--brand-dark);
+      }
+
+      .status-not-started {
+        background: var(--error-bg);
+        color: var(--error);
+      }
+
+      .submission-list {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-top: 16px;
+      }
+
+      .submission-pill {
+        background: var(--surface-soft);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        font-weight: 900;
+        padding: 10px;
+      }
+
+      .submission-pill span {
+        color: var(--muted);
+        display: block;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+      }
+
+      .submission-pill strong {
+        color: var(--ink);
+      }
+
+      .latest-date {
+        color: var(--muted);
+        font-size: 0.9rem;
+        font-weight: 800;
+        margin: 14px 0 0;
+      }
+
+      @media (max-width: 720px) {
+        .dashboard-toolbar,
+        .employee-card header {
+          display: grid;
+        }
+
+        .submission-list {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 420px) {
+        .submission-list {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page-shell dashboard-shell">
+      <header class="form-header">
+        <p class="eyebrow">Internal CRS View</p>
+        <h1>Community Regenerative Solutions</h1>
+        <p>Onboarding Dashboard</p>
+      </header>
+
+      <section class="notice">
+        <p>This simple dashboard shows stored form submissions grouped by employee name. Authentication has not been added yet.</p>
+      </section>
+
+      <section class="dashboard-toolbar" aria-label="Dashboard controls">
+        <p id="summaryText">Loading submissions...</p>
+        <button id="refreshButton" class="refresh-button" type="button">Refresh</button>
+      </section>
+
+      <div id="errorSummary" class="error-summary" hidden></div>
+      <section id="employeeGrid" class="employee-grid" aria-live="polite"></section>
+    </main>
+
+    <script>
+      const REQUIRED_TYPES = ["application", "orientation", "competency", "background"];
+      const TYPE_LABELS = {
+        application: "Application",
+        orientation: "Orientation",
+        competency: "Competency",
+        background: "Background"
+      };
+
+      const employeeGrid = document.querySelector("#employeeGrid");
+      const summaryText = document.querySelector("#summaryText");
+      const errorSummary = document.querySelector("#errorSummary");
+      const refreshButton = document.querySelector("#refreshButton");
+
+      function normalizeName(name) {
+        return String(name || "Unknown Employee").trim() || "Unknown Employee";
+      }
+
+      function formatDate(value) {
+        if (!value) return "No date recorded";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value;
+        return date.toLocaleString();
+      }
+
+      function groupByEmployee(submissions) {
+        return submissions.reduce((groups, submission) => {
+          const fullName = normalizeName(submission.fullName);
+          const key = fullName.toLowerCase();
+
+          if (!groups[key]) {
+            groups[key] = {
+              fullName,
+              submissions: [],
+              types: new Set(),
+              latestDate: ""
+            };
+          }
+
+          groups[key].submissions.push(submission);
+          groups[key].types.add(submission.submissionType);
+
+          if (!groups[key].latestDate || new Date(submission.dateSubmitted) > new Date(groups[key].latestDate)) {
+            groups[key].latestDate = submission.dateSubmitted;
+          }
+
+          return groups;
+        }, {});
+      }
+
+      function calculateStatus(types) {
+        const completedCount = REQUIRED_TYPES.filter((type) => types.has(type)).length;
+
+        if (completedCount === REQUIRED_TYPES.length) return "Ready";
+        if (completedCount === 1 && types.has("application")) return "Not Started";
+        return "Pending";
+      }
+
+      function statusClass(status) {
+        if (status === "Ready") return "status-ready";
+        if (status === "Not Started") return "status-not-started";
+        return "status-pending";
+      }
+
+      function renderEmployees(submissions) {
+        const groups = Object.values(groupByEmployee(submissions))
+          .sort((a, b) => a.fullName.localeCompare(b.fullName));
+
+        summaryText.textContent = `${groups.length} employee${groups.length === 1 ? "" : "s"} found`;
+
+        if (!groups.length) {
+          employeeGrid.innerHTML = `
+            <article class="employee-card">
+              <h2>No submissions yet</h2>
+              <p class="latest-date">Submitted forms will appear here after successful email/PDF submission.</p>
+            </article>
+          `;
+          return;
+        }
+
+        employeeGrid.innerHTML = groups.map((group) => {
+          const status = calculateStatus(group.types);
+
+          return `
+            <article class="employee-card">
+              <header>
+                <div>
+                  <h2>${group.fullName}</h2>
+                  <small>${group.submissions.length} stored submission${group.submissions.length === 1 ? "" : "s"}</small>
+                </div>
+                <span class="status-badge ${statusClass(status)}">${status}</span>
+              </header>
+
+              <div class="submission-list">
+                ${REQUIRED_TYPES.map((type) => `
+                  <div class="submission-pill">
+                    <span>${TYPE_LABELS[type]}</span>
+                    <strong>${group.types.has(type) ? "Yes" : "No"}</strong>
+                  </div>
+                `).join("")}
+              </div>
+
+              <p class="latest-date">Latest submission: ${formatDate(group.latestDate)}</p>
+            </article>
+          `;
+        }).join("");
+      }
+
+      async function loadSubmissions() {
+        errorSummary.hidden = true;
+        refreshButton.disabled = true;
+        summaryText.textContent = "Loading submissions...";
+
+        try {
+          const response = await fetch("/api/submissions", {
+            headers: { Accept: "application/json" }
+          });
+
+          if (!response.ok) {
+            throw new Error("Submissions could not be loaded.");
+          }
+
+          const data = await response.json();
+          renderEmployees(Array.isArray(data.submissions) ? data.submissions : []);
+        } catch (error) {
+          console.error("CRS dashboard load failed:", error);
+          summaryText.textContent = "Unable to load submissions";
+          errorSummary.textContent = error.message || "Submissions could not be loaded.";
+          errorSummary.hidden = false;
+          employeeGrid.innerHTML = "";
+        } finally {
+          refreshButton.disabled = false;
+        }
+      }
+
+      refreshButton.addEventListener("click", loadSubmissions);
+      loadSubmissions();
+    </script>
+  </body>
+</html>
