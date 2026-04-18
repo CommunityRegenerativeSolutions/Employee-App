@@ -1,4 +1,5 @@
 const { Resend } = require("resend");
+const { storeSubmission } = require("./submission-store");
 
 const PAGE = { width: 612, height: 792, margin: 42 };
 const FONT = { body: "F1", bold: "F2" };
@@ -446,10 +447,18 @@ module.exports = async function handler(req, res) {
     const submittedAtDisplay = body.submittedAtDisplay || new Date().toLocaleString();
     const pdfBuffer = createOrientationPacketPdf(packet);
     const emailResult = await sendEmail({ packet, submittedAtDisplay, pdfBuffer });
+    const storedSubmission = await storeSubmission({
+      fullName: normalizeText(packet.fullName),
+      email: normalizeText(packet.email),
+      submissionType: "orientation",
+      pdfFileName: PDF_FILENAME,
+      dateSubmitted: body.submittedAt || new Date().toISOString()
+    });
 
     return res.status(200).json({
       ok: true,
-      emailId: emailResult?.id
+      emailId: emailResult?.id,
+      submissionId: storedSubmission.id
     });
   } catch (error) {
     console.error("CRS orientation packet submission failed:", error);

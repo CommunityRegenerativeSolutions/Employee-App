@@ -1,4 +1,5 @@
 const { Resend } = require("resend");
+const { storeSubmission } = require("./submission-store");
 
 const PAGE = { width: 612, height: 792, margin: 42 };
 const FONT = { body: "F1", bold: "F2" };
@@ -350,10 +351,18 @@ module.exports = async function handler(req, res) {
     const submittedAtDisplay = body.submittedAtDisplay || new Date().toLocaleString();
     const pdfBuffer = createBackgroundAuthorizationPdf(authorization);
     const emailResult = await sendEmail({ authorization, submittedAtDisplay, pdfBuffer });
+    const storedSubmission = await storeSubmission({
+      fullName: normalizeText(authorization.fullName),
+      email: "",
+      submissionType: "background",
+      pdfFileName: pdfFileName(authorization),
+      dateSubmitted: body.submittedAt || new Date().toISOString()
+    });
 
     return res.status(200).json({
       ok: true,
-      emailId: emailResult?.id
+      emailId: emailResult?.id,
+      submissionId: storedSubmission.id
     });
   } catch (error) {
     console.error("CRS background authorization submission failed:", error);

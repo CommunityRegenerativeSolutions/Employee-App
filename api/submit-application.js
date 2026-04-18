@@ -1,4 +1,5 @@
 const { Resend } = require("resend");
+const { storeSubmission } = require("./submission-store");
 
 const PAGE = { width: 612, height: 792, margin: 42 };
 const FONT = { body: "F1", bold: "F2" };
@@ -537,10 +538,18 @@ module.exports = async function handler(req, res) {
     const applicant = body.applicant || body || {};
     const pdfBuffer = createEmploymentApplicationPdf(applicant);
     const emailResult = await sendEmail({ applicant, pdfBuffer });
+    const storedSubmission = await storeSubmission({
+      fullName: normalizeText(applicant.fullName),
+      email: normalizeText(applicant.email),
+      submissionType: "application",
+      pdfFileName: pdfFileName(applicant),
+      dateSubmitted: body.submittedAt || new Date().toISOString()
+    });
 
     return res.status(200).json({
       ok: true,
-      emailId: emailResult?.id
+      emailId: emailResult?.id,
+      submissionId: storedSubmission.id
     });
   } catch (error) {
     console.error("CRS application submission failed:", error);
