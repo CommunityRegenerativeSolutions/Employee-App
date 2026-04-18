@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Community Regenerative Solutions | Background Check Authorization</title>
+    <link rel="stylesheet" href="../assets/styles.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="form-header">
+        <p class="eyebrow">Private CRS Authorization</p>
+        <h1>Community Regenerative Solutions</h1>
+        <p>Background Check Authorization</p>
+      </header>
+
+      <section class="notice" aria-label="Form instructions">
+        <p>Please complete this authorization so Community Regenerative Solutions can complete required background checks for employment eligibility and compliance.</p>
+      </section>
+
+      <!-- Private direct-link form. This page is not linked from the public site. -->
+      <form id="backgroundForm" class="application-form" method="POST" action="/api/submit-background" enctype="application/x-www-form-urlencoded" novalidate>
+        <div id="errorSummary" class="error-summary" tabindex="-1" hidden></div>
+
+        <section class="form-section" aria-labelledby="employeeInfoTitle">
+          <h2 id="employeeInfoTitle">Employee Information</h2>
+
+          <label for="fullName">Full Legal Name <span>*</span></label>
+          <input id="fullName" name="fullName" autocomplete="name" required>
+
+          <label for="dateOfBirth">Date of Birth <span>*</span></label>
+          <input id="dateOfBirth" name="dateOfBirth" type="date" required>
+
+          <label for="ssnLast4">Last 4 of SSN <span>*</span></label>
+          <input id="ssnLast4" name="ssnLast4" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required>
+
+          <label for="currentAddress">Current Address <span>*</span></label>
+          <textarea id="currentAddress" name="currentAddress" rows="3" autocomplete="street-address" required></textarea>
+        </section>
+
+        <section class="form-section" aria-labelledby="authorizationTitle">
+          <h2 id="authorizationTitle">Authorization</h2>
+          <div class="helper-note">
+            <p>"I authorize Community Regenerative Solutions to obtain background checks as required by Texas HHSC regulations. This includes, but is not limited to:</p>
+            <ul>
+              <li>Texas Department of Public Safety (DPS) Criminal History Check</li>
+              <li>Employee Misconduct Registry (EMR)</li>
+              <li>Nurse Aide Registry (NAR)</li>
+            </ul>
+            <p>I understand that this information will be used solely for employment eligibility and compliance purposes. I acknowledge that providing false or incomplete information may result in disqualification or termination."</p>
+          </div>
+
+          <label class="choice checkbox-choice">
+            <input type="checkbox" name="backgroundAuthorization" required>
+            <span>I authorize CRS to perform the required background checks</span>
+          </label>
+        </section>
+
+        <section class="form-section" aria-labelledby="signatureTitle">
+          <h2 id="signatureTitle">Signature</h2>
+
+          <label for="employeeSignatureName">Employee Full Name <span>*</span></label>
+          <input id="employeeSignatureName" name="employeeSignatureName" required>
+
+          <label for="signature">Signature <span>*</span></label>
+          <input id="signature" name="signature" placeholder="Type your full legal name" required>
+
+          <label for="signatureDate">Date <span>*</span></label>
+          <input id="signatureDate" name="signatureDate" type="date" required>
+        </section>
+
+        <div id="submissionStatus" class="submission-status" role="status" aria-live="polite" hidden></div>
+        <button class="submit-button" type="submit">Submit Background Authorization</button>
+      </form>
+
+      <section id="successMessage" class="success-message" hidden tabindex="-1">
+        <h2>Your background check authorization has been submitted successfully.</h2>
+        <p>The completed authorization PDF has been sent to Community Regenerative Solutions.</p>
+      </section>
+    </main>
+
+    <script src="../src/background.js"></script>
+  </body>
+</html>
