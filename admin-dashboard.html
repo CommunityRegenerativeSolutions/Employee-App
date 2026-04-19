@@ -126,6 +126,24 @@
         margin: 14px 0 0;
       }
 
+      .pdf-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .pdf-links a {
+        background: var(--brand-soft);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--brand-dark);
+        font-size: 0.85rem;
+        font-weight: 900;
+        padding: 8px 10px;
+        text-decoration: none;
+      }
+
       @media (max-width: 720px) {
         .dashboard-toolbar,
         .employee-card header {
@@ -229,11 +247,20 @@
         return "status-pending";
       }
 
-      function renderEmployees(submissions) {
+      function escapeHtml(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function renderEmployees(submissions, source) {
         const groups = Object.values(groupByEmployee(submissions))
           .sort((a, b) => a.fullName.localeCompare(b.fullName));
 
-        summaryText.textContent = `${groups.length} employee${groups.length === 1 ? "" : "s"} found`;
+        summaryText.textContent = `${groups.length} employee${groups.length === 1 ? "" : "s"} found (${source || "supabase"})`;
 
         if (!groups.length) {
           employeeGrid.innerHTML = `
@@ -247,12 +274,20 @@
 
         employeeGrid.innerHTML = groups.map((group) => {
           const status = calculateStatus(group.types);
+          const pdfLinks = group.submissions
+            .filter((submission) => submission.pdfUrl)
+            .map((submission) => `
+              <a href="${escapeHtml(submission.pdfUrl)}" target="_blank" rel="noopener">
+                ${TYPE_LABELS[submission.submissionType] || submission.submissionType} PDF
+              </a>
+            `)
+            .join("");
 
           return `
             <article class="employee-card">
               <header>
                 <div>
-                  <h2>${group.fullName}</h2>
+                  <h2>${escapeHtml(group.fullName)}</h2>
                   <small>${group.submissions.length} stored submission${group.submissions.length === 1 ? "" : "s"}</small>
                 </div>
                 <span class="status-badge ${statusClass(status)}">${status}</span>
@@ -267,6 +302,7 @@
                 `).join("")}
               </div>
 
+              ${pdfLinks ? `<div class="pdf-links">${pdfLinks}</div>` : ""}
               <p class="latest-date">Latest submission: ${formatDate(group.latestDate)}</p>
             </article>
           `;
@@ -288,7 +324,7 @@
           }
 
           const data = await response.json();
-          renderEmployees(Array.isArray(data.submissions) ? data.submissions : []);
+          renderEmployees(Array.isArray(data.submissions) ? data.submissions : [], data.source);
         } catch (error) {
           console.error("CRS dashboard load failed:", error);
           summaryText.textContent = "Unable to load submissions";

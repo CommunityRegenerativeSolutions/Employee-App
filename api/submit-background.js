@@ -1,5 +1,6 @@
 const { Resend } = require("resend");
 const { storeSubmission } = require("./submission-store");
+const { storeSupabaseSubmission } = require("./supabase");
 
 const PAGE = { width: 612, height: 792, margin: 42 };
 const FONT = { body: "F1", bold: "F2" };
@@ -348,26 +349,36 @@ module.exports = async function handler(req, res) {
   try {
     const body = await readJsonBody(req);
     const authorization = body.authorization || body || {};
+    const dateSubmitted = body.submittedAt || new Date().toISOString();
     const submittedAtDisplay = body.submittedAtDisplay || new Date().toLocaleString();
     const pdfBuffer = createBackgroundAuthorizationPdf(authorization);
     const emailResult = await sendEmail({ authorization, submittedAtDisplay, pdfBuffer });
+    const supabaseSubmission = await storeSupabaseSubmission({
+      fullName: normalizeText(authorization.fullName),
+      email: "",
+      submissionType: "background",
+      pdfBuffer,
+      createdAt: dateSubmitted
+    });
     const storedSubmission = await storeSubmission({
       fullName: normalizeText(authorization.fullName),
       email: "",
       submissionType: "background",
-      pdfFileName: pdfFileName(authorization),
-      dateSubmitted: body.submittedAt || new Date().toISOString()
+      pdfFileName: supabaseSubmission.pdfFileName,
+      pdfUrl: supabaseSubmission.pdfUrl,
+      dateSubmitted
     });
 
     return res.status(200).json({
       ok: true,
       emailId: emailResult?.id,
-      submissionId: storedSubmission.id
+      submissionId: supabaseSubmission.id || storedSubmission.id,
+      pdfUrl: supabaseSubmission.pdfUrl
     });
   } catch (error) {
     console.error("CRS background authorization submission failed:", error);
     return res.status(500).json({
-      error: "Background authorization email failed to send."
+      error: error.message || "Background authorization submission failed."
     });
   }
 };

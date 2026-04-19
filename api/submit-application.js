@@ -1,5 +1,6 @@
 const { Resend } = require("resend");
 const { storeSubmission } = require("./submission-store");
+const { storeSupabaseSubmission } = require("./supabase");
 
 const PAGE = { width: 612, height: 792, margin: 42 };
 const FONT = { body: "F1", bold: "F2" };
@@ -536,25 +537,35 @@ module.exports = async function handler(req, res) {
   try {
     const body = await readJsonBody(req);
     const applicant = body.applicant || body || {};
+    const dateSubmitted = body.submittedAt || new Date().toISOString();
     const pdfBuffer = createEmploymentApplicationPdf(applicant);
     const emailResult = await sendEmail({ applicant, pdfBuffer });
+    const supabaseSubmission = await storeSupabaseSubmission({
+      fullName: normalizeText(applicant.fullName),
+      email: normalizeText(applicant.email),
+      submissionType: "application",
+      pdfBuffer,
+      createdAt: dateSubmitted
+    });
     const storedSubmission = await storeSubmission({
       fullName: normalizeText(applicant.fullName),
       email: normalizeText(applicant.email),
       submissionType: "application",
-      pdfFileName: pdfFileName(applicant),
-      dateSubmitted: body.submittedAt || new Date().toISOString()
+      pdfFileName: supabaseSubmission.pdfFileName,
+      pdfUrl: supabaseSubmission.pdfUrl,
+      dateSubmitted
     });
 
     return res.status(200).json({
       ok: true,
       emailId: emailResult?.id,
-      submissionId: storedSubmission.id
+      submissionId: supabaseSubmission.id || storedSubmission.id,
+      pdfUrl: supabaseSubmission.pdfUrl
     });
   } catch (error) {
     console.error("CRS application submission failed:", error);
     return res.status(500).json({
-      error: "Application email failed to send."
+      error: error.message || "Application submission failed."
     });
   }
 };

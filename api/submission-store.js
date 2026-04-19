@@ -31,6 +31,7 @@ async function storeSubmission(record) {
     email: record.email || "",
     submissionType: record.submissionType,
     pdfFileName: record.pdfFileName,
+    pdfUrl: record.pdfUrl || "",
     dateSubmitted: record.dateSubmitted || new Date().toISOString()
   };
 

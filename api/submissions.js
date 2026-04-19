@@ -1,4 +1,5 @@
 const { readSubmissions } = require("./submission-store");
+const { readSupabaseSubmissions } = require("./supabase");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "GET") {
@@ -7,10 +8,20 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const submissions = await readSubmissions();
+    let submissions;
+    let source = "supabase";
+
+    try {
+      submissions = await readSupabaseSubmissions();
+    } catch (supabaseError) {
+      console.error("CRS Supabase submissions lookup failed, using JSON fallback:", supabaseError);
+      submissions = await readSubmissions();
+      source = "temporary-json";
+    }
 
     return res.status(200).json({
       ok: true,
+      source,
       submissions
     });
   } catch (error) {

@@ -1,5 +1,6 @@
 const { Resend } = require("resend");
 const { storeSubmission } = require("./submission-store");
+const { storeSupabaseSubmission } = require("./supabase");
 
 const PAGE = { width: 612, height: 792, margin: 42 };
 const FONT = { body: "F1", bold: "F2" };
@@ -444,26 +445,36 @@ module.exports = async function handler(req, res) {
   try {
     const body = await readJsonBody(req);
     const packet = body.packet || body || {};
+    const dateSubmitted = body.submittedAt || new Date().toISOString();
     const submittedAtDisplay = body.submittedAtDisplay || new Date().toLocaleString();
     const pdfBuffer = createOrientationPacketPdf(packet);
     const emailResult = await sendEmail({ packet, submittedAtDisplay, pdfBuffer });
+    const supabaseSubmission = await storeSupabaseSubmission({
+      fullName: normalizeText(packet.fullName),
+      email: normalizeText(packet.email),
+      submissionType: "orientation",
+      pdfBuffer,
+      createdAt: dateSubmitted
+    });
     const storedSubmission = await storeSubmission({
       fullName: normalizeText(packet.fullName),
       email: normalizeText(packet.email),
       submissionType: "orientation",
-      pdfFileName: PDF_FILENAME,
-      dateSubmitted: body.submittedAt || new Date().toISOString()
+      pdfFileName: supabaseSubmission.pdfFileName,
+      pdfUrl: supabaseSubmission.pdfUrl,
+      dateSubmitted
     });
 
     return res.status(200).json({
       ok: true,
       emailId: emailResult?.id,
-      submissionId: storedSubmission.id
+      submissionId: supabaseSubmission.id || storedSubmission.id,
+      pdfUrl: supabaseSubmission.pdfUrl
     });
   } catch (error) {
     console.error("CRS orientation packet submission failed:", error);
     return res.status(500).json({
-      error: "Orientation packet email failed to send."
+      error: error.message || "Orientation packet submission failed."
     });
   }
 };
