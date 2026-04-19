@@ -4,12 +4,33 @@ const { storeSupabaseSubmission } = require("./supabase");
 
 const PAGE = { width: 612, height: 792, margin: 42 };
 const FONT = { body: "F1", bold: "F2" };
-const AUTHORIZATION_TEXT = [
-  "I authorize Community Regenerative Solutions to obtain background checks as required by Texas HHSC regulations. This includes, but is not limited to:",
-  "- Texas Department of Public Safety (DPS) Criminal History Check",
-  "- Employee Misconduct Registry (EMR)",
-  "- Nurse Aide Registry (NAR)",
-  "I understand that this information will be used solely for employment eligibility and compliance purposes. I acknowledge that providing false or incomplete information may result in disqualification or termination."
+
+const SERVICE_FIELDS = [
+  ["Bathing / Personal Hygiene", "serviceBathingHygiene"],
+  ["Dressing Assistance", "serviceDressing"],
+  ["Toileting / Incontinence Care", "serviceToileting"],
+  ["Mobility / Transfers", "serviceMobilityTransfers"],
+  ["Meal Preparation", "serviceMealPreparation"],
+  ["Feeding Assistance", "serviceFeeding"],
+  ["Light Housekeeping", "serviceHousekeeping"],
+  ["Companionship / Supervision", "serviceCompanionship"],
+  ["Errands / Shopping", "serviceErrands"]
+];
+
+const SAFETY_FIELDS = [
+  ["Fall Risk", "safetyFallRisk"],
+  ["Pets", "safetyPets"],
+  ["Smoking in home", "safetySmoking"],
+  ["Clutter / Obstructions", "safetyClutter"],
+  ["Other", "safetyOther"]
+];
+
+const CONSENT_TEXT = [
+  "I understand that Community Regenerative Solutions provides non-skilled personal assistance services only. I acknowledge that services will be provided according to an agreed service plan.",
+  "I understand that:",
+  "- CRS does not provide medical or skilled nursing services",
+  "- Staff do not administer medications",
+  "- Services are based on availability and agreed schedule"
 ];
 
 function normalizeText(value) {
@@ -66,12 +87,18 @@ function checked(valueText) {
   return normalizeText(valueText) ? "Yes" : "";
 }
 
-function pdfFileName(authorization) {
-  const safeName = value(authorization, "fullName")
+function selectedList(data, fields) {
+  return fields
+    .filter(([, key]) => data[key] === true || value(data, key) === "on")
+    .map(([label]) => label);
+}
+
+function pdfFileName(intake) {
+  const safeName = value(intake, "fullName")
     .replace(/[^a-z0-9]+/gi, "_")
     .replace(/^_|_$/g, "");
 
-  return `${safeName || "Employee"}_Background_Authorization.pdf`;
+  return `${safeName || "Client"}_Client_Intake.pdf`;
 }
 
 function createPdfContext() {
@@ -90,9 +117,7 @@ function createPdfContext() {
   }
 
   function ensure(spaceNeeded) {
-    if (y - spaceNeeded < PAGE.margin) {
-      addPage();
-    }
+    if (y - spaceNeeded < PAGE.margin) addPage();
   }
 
   function text(textValue, x, yPos, size = 9, font = FONT.body, color = 0) {
@@ -113,7 +138,7 @@ function createPdfContext() {
 
   function title() {
     text("Community Regenerative Solutions", 132, 748, 18, FONT.bold);
-    text("Background Check Authorization", 190, 724, 15, FONT.bold);
+    text("Client Intake Form (CRS-CL01)", 190, 724, 15, FONT.bold);
     line(PAGE.margin, 710, PAGE.width - PAGE.margin, 710, 1);
     y = 690;
   }
@@ -144,9 +169,10 @@ function createPdfContext() {
     y -= height;
   }
 
-  function fullField(label, fieldValue, height = 42) {
+  function fullField(label, fieldValue, height = 44) {
+    if (!normalizeText(fieldValue)) return;
     ensure(height + 4);
-    field(label, fieldValue, PAGE.margin, PAGE.width - PAGE.margin * 2, { maxLines: 3 });
+    field(label, fieldValue, PAGE.margin, PAGE.width - PAGE.margin * 2, { maxLines: 4 });
     y -= height;
   }
 
@@ -168,7 +194,7 @@ function createPdfContext() {
   function table(headers, rows, columnWidths) {
     if (!rows.length) return;
     const totalWidth = columnWidths.reduce((sum, item) => sum + item, 0);
-    const rowHeight = 24;
+    const rowHeight = 25;
     const startX = PAGE.margin;
     ensure(rowHeight * (rows.length + 1) + 8);
 
@@ -205,37 +231,93 @@ function createPdfContext() {
   return { title, section, fieldRow, fullField, paragraph, table, finish };
 }
 
-function buildPdfPages(authorization) {
+function buildPdfPages(intake) {
   const pdf = createPdfContext();
   pdf.title();
 
-  pdf.section("Employee Information");
+  pdf.section("Client Information");
   pdf.fieldRow([
-    ["Full Legal Name", value(authorization, "fullName")],
-    ["Date of Birth", value(authorization, "dateOfBirth")]
+    ["Full Legal Name", value(intake, "fullName")],
+    ["Date of Birth", value(intake, "dateOfBirth")]
   ]);
   pdf.fieldRow([
-    ["Last 4 of SSN", value(authorization, "ssnLast4")]
+    ["Gender", value(intake, "gender")],
+    ["Phone Number", value(intake, "phone")],
+    ["Email Address", value(intake, "email")]
   ]);
-  pdf.fullField("Current Address", value(authorization, "currentAddress"), 48);
+  pdf.fullField("Service Address", value(intake, "serviceAddress"), 48);
+  pdf.fullField("Mailing Address", value(intake, "mailingAddress"), 48);
 
-  pdf.section("Authorization Text");
-  pdf.paragraph(AUTHORIZATION_TEXT);
+  if (value(intake, "responsiblePartyName") || value(intake, "responsiblePartyPhone")) {
+    pdf.section("Responsible Party / Guardian");
+    pdf.fieldRow([
+      ["Full Name", value(intake, "responsiblePartyName")],
+      ["Relationship to Client", value(intake, "responsiblePartyRelationship")]
+    ]);
+    pdf.fieldRow([
+      ["Phone Number", value(intake, "responsiblePartyPhone")],
+      ["Email", value(intake, "responsiblePartyEmail")],
+      ["Authorized to Make Decisions", value(intake, "responsiblePartyAuthorized")]
+    ]);
+  }
 
-  pdf.section("Acknowledgment");
+  pdf.section("Emergency Contact");
+  pdf.fieldRow([
+    ["Full Name", value(intake, "emergencyName")],
+    ["Relationship", value(intake, "emergencyRelationship")],
+    ["Phone Number", value(intake, "emergencyPhone")]
+  ]);
+
+  pdf.section("Primary Needs & Requested Services");
+  pdf.fullField("Requested Services", selectedList(intake, SERVICE_FIELDS).join(", "), 54);
+  pdf.fieldRow([
+    ["Preferred Schedule Days", value(intake, "preferredScheduleDays")],
+    ["Preferred Schedule Hours", value(intake, "preferredScheduleHours")]
+  ]);
+
+  pdf.section("Functional Status");
   pdf.table(
-    ["Acknowledgment", "Checked"],
-    [["I authorize CRS to perform the required background checks", checked(authorization.backgroundAuthorization)]],
+    ["Area", "Status"],
+    [
+      ["Mobility", value(intake, "mobilityStatus")],
+      ["Transfers", value(intake, "transferStatus")],
+      ["Toileting", value(intake, "toiletingStatus")],
+      ["Bathing", value(intake, "bathingStatus")]
+    ],
+    [180, 350]
+  );
+
+  pdf.section("Health Information (Non-Skilled Awareness Only)");
+  pdf.paragraph("CRS staff do not administer medications.");
+  pdf.fullField("Primary Conditions / Diagnoses", value(intake, "primaryConditions"), 52);
+  pdf.fullField("Allergies", value(intake, "allergies"), 52);
+  pdf.fullField("Medications (for awareness only)", value(intake, "medications"), 52);
+
+  pdf.section("Safety & Home Environment");
+  pdf.fullField("Safety Items", selectedList(intake, SAFETY_FIELDS).join(", "), 44);
+  pdf.fullField("Other safety concern text", value(intake, "otherSafetyConcern"), 52);
+  pdf.fullField("Emergency instructions or special notes", value(intake, "emergencyInstructions"), 56);
+
+  pdf.section("Client Preferences");
+  pdf.fullField("Preferred language", value(intake, "preferredLanguage"), 36);
+  pdf.fullField("Care preferences / routines", value(intake, "carePreferences"), 56);
+  pdf.fullField("Anything important for staff to know", value(intake, "staffNotes"), 56);
+
+  pdf.section("Consent for Services");
+  pdf.paragraph(CONSENT_TEXT);
+  pdf.table(
+    ["Consent", "Checked"],
+    [["I consent to receive services from CRS", checked(intake.serviceConsent)]],
     [440, 90]
   );
 
   pdf.section("Signature");
   pdf.fieldRow([
-    ["Employee Full Name", value(authorization, "employeeSignatureName")],
-    ["Signature", value(authorization, "signature")]
+    ["Client / Responsible Party Name", value(intake, "signerName")],
+    ["Signature", value(intake, "signature")]
   ]);
   pdf.fieldRow([
-    ["Date", value(authorization, "signatureDate")]
+    ["Date", value(intake, "signatureDate")]
   ]);
 
   return pdf.finish();
@@ -281,8 +363,8 @@ function buildPdfBuffer(pageStreams) {
   return Buffer.from(pdf, "utf8");
 }
 
-function createBackgroundAuthorizationPdf(authorization) {
-  return buildPdfBuffer(buildPdfPages(authorization));
+function createClientIntakePdf(intake) {
+  return buildPdfBuffer(buildPdfPages(intake));
 }
 
 async function readJsonBody(req) {
@@ -302,17 +384,17 @@ async function readJsonBody(req) {
   return JSON.parse(rawBody || "{}");
 }
 
-function buildEmailHtml(authorization, submittedAtDisplay) {
+function buildEmailHtml(intake, submittedAtDisplay) {
   return `
-    <p>New CRS background check authorization submitted.</p>
-    <p><strong>Employee:</strong> ${escapeHtml(authorization.fullName)}</p>
-    <p><strong>Date of Birth:</strong> ${escapeHtml(authorization.dateOfBirth)}</p>
-    <p><strong>Last 4 of SSN:</strong> ${escapeHtml(authorization.ssnLast4)}</p>
+    <p>New CRS client intake submitted.</p>
+    <p><strong>Client:</strong> ${escapeHtml(intake.fullName)}</p>
+    <p><strong>Phone:</strong> ${escapeHtml(intake.phone)}</p>
+    <p><strong>Email:</strong> ${escapeHtml(intake.email)}</p>
     <p><strong>Submitted:</strong> ${escapeHtml(submittedAtDisplay)}</p>
   `;
 }
 
-async function sendEmail({ authorization, submittedAtDisplay, pdfBuffer }) {
+async function sendEmail({ intake, submittedAtDisplay, pdfBuffer }) {
   if (!process.env.RESEND_API_KEY) {
     throw new Error("Missing RESEND_API_KEY environment variable.");
   }
@@ -321,31 +403,31 @@ async function sendEmail({ authorization, submittedAtDisplay, pdfBuffer }) {
   const { data, error } = await resend.emails.send({
     from: "onboarding@resend.dev",
     to: "info@communityregenerativesolutions.com",
-    subject: `New CRS Background Authorization - ${normalizeText(authorization.fullName) || "Employee"}`,
-    html: buildEmailHtml(authorization, submittedAtDisplay),
+    subject: `New CRS Client Intake - ${normalizeText(intake.fullName) || "Client"}`,
+    html: buildEmailHtml(intake, submittedAtDisplay),
     attachments: [
       {
-        filename: pdfFileName(authorization),
+        filename: pdfFileName(intake),
         content: pdfBuffer
       }
     ]
   });
 
   if (error) {
-    console.error("Resend background authorization email failed:", error);
+    console.error("Resend client intake email failed:", error);
     throw new Error(`Resend email failed: ${error.message || JSON.stringify(error)}`);
   }
 
-  console.info("Resend background authorization email sent:", data);
+  console.info("Resend client intake email sent:", data);
   return data;
 }
 
 module.exports = async function handler(req, res) {
-  console.info("CRS route started: /api/submit-background", { method: req.method });
-  console.info("CRS route /api/submit-background: supabase helper loaded", {
+  console.info("CRS route started: /api/submit-client-intake", { method: req.method });
+  console.info("CRS route /api/submit-client-intake: supabase helper loaded", {
     storeSupabaseSubmission: typeof storeSupabaseSubmission === "function"
   });
-  console.info("CRS route /api/submit-background: env vars present", {
+  console.info("CRS route /api/submit-client-intake: env vars present", {
     SUPABASE_URL: Boolean(process.env.SUPABASE_URL),
     SUPABASE_ANON_KEY: Boolean(process.env.SUPABASE_ANON_KEY)
   });
@@ -357,22 +439,22 @@ module.exports = async function handler(req, res) {
 
   try {
     const body = await readJsonBody(req);
-    const authorization = body.authorization || body || {};
+    const intake = body.intake || body || {};
     const dateSubmitted = body.submittedAt || new Date().toISOString();
     const submittedAtDisplay = body.submittedAtDisplay || new Date().toLocaleString();
-    const pdfBuffer = createBackgroundAuthorizationPdf(authorization);
-    const emailResult = await sendEmail({ authorization, submittedAtDisplay, pdfBuffer });
+    const pdfBuffer = createClientIntakePdf(intake);
+    const emailResult = await sendEmail({ intake, submittedAtDisplay, pdfBuffer });
     const supabaseSubmission = await storeSupabaseSubmission({
-      fullName: normalizeText(authorization.fullName),
-      email: "",
-      submissionType: "background",
+      fullName: normalizeText(intake.fullName),
+      email: normalizeText(intake.email),
+      submissionType: "client-intake",
       pdfBuffer,
       createdAt: dateSubmitted
     });
     const storedSubmission = await storeSubmission({
-      fullName: normalizeText(authorization.fullName),
-      email: "",
-      submissionType: "background",
+      fullName: normalizeText(intake.fullName),
+      email: normalizeText(intake.email),
+      submissionType: "client-intake",
       pdfFileName: supabaseSubmission.pdfFileName,
       pdfUrl: supabaseSubmission.pdfUrl,
       dateSubmitted
@@ -385,9 +467,9 @@ module.exports = async function handler(req, res) {
       pdfUrl: supabaseSubmission.pdfUrl
     });
   } catch (error) {
-    console.error("CRS background authorization submission failed:", error);
+    console.error("CRS client intake submission failed:", error);
     return res.status(500).json({
-      error: error.message || "Background authorization submission failed."
+      error: error.message || "Client intake submission failed."
     });
   }
 };

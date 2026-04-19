@@ -437,6 +437,15 @@ async function sendEmail({ packet, submittedAtDisplay, pdfBuffer }) {
 }
 
 module.exports = async function handler(req, res) {
+  console.info("CRS route started: /api/submit-orientation", { method: req.method });
+  console.info("CRS route /api/submit-orientation: supabase helper loaded", {
+    storeSupabaseSubmission: typeof storeSupabaseSubmission === "function"
+  });
+  console.info("CRS route /api/submit-orientation: env vars present", {
+    SUPABASE_URL: Boolean(process.env.SUPABASE_URL),
+    SUPABASE_ANON_KEY: Boolean(process.env.SUPABASE_ANON_KEY)
+  });
+
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });

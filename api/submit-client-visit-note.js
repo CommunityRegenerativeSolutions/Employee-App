@@ -4,12 +4,21 @@ const { storeSupabaseSubmission } = require("./supabase");
 
 const PAGE = { width: 612, height: 792, margin: 42 };
 const FONT = { body: "F1", bold: "F2" };
-const AUTHORIZATION_TEXT = [
-  "I authorize Community Regenerative Solutions to obtain background checks as required by Texas HHSC regulations. This includes, but is not limited to:",
-  "- Texas Department of Public Safety (DPS) Criminal History Check",
-  "- Employee Misconduct Registry (EMR)",
-  "- Nurse Aide Registry (NAR)",
-  "I understand that this information will be used solely for employment eligibility and compliance purposes. I acknowledge that providing false or incomplete information may result in disqualification or termination."
+
+const SERVICE_FIELDS = [
+  ["Bathing / Hygiene Assistance", "serviceBathingHygiene"],
+  ["Grooming", "serviceGrooming"],
+  ["Dressing Assistance", "serviceDressing"],
+  ["Toileting / Incontinence Care", "serviceToileting"],
+  ["Mobility / Transfers", "serviceMobilityTransfers"],
+  ["Meal Preparation", "serviceMealPreparation"],
+  ["Feeding Assistance", "serviceFeeding"],
+  ["Light Housekeeping", "serviceHousekeeping"],
+  ["Laundry", "serviceLaundry"],
+  ["Safety Supervision", "serviceSafetySupervision"],
+  ["Companionship", "serviceCompanionship"],
+  ["Errands / Shopping", "serviceErrands"],
+  ["Other", "serviceOther"]
 ];
 
 function normalizeText(value) {
@@ -62,16 +71,28 @@ function value(data, key) {
   return normalizeText(data[key]);
 }
 
-function checked(valueText) {
-  return normalizeText(valueText) ? "Yes" : "";
+function safeName(valueText) {
+  return normalizeText(valueText)
+    .replace(/[^a-z0-9]+/gi, "_")
+    .replace(/^_|_$/g, "") || "Client";
 }
 
-function pdfFileName(authorization) {
-  const safeName = value(authorization, "fullName")
-    .replace(/[^a-z0-9]+/gi, "_")
-    .replace(/^_|_$/g, "");
+function safeDate(valueText) {
+  return normalizeText(valueText).replace(/[^0-9-]+/g, "") || new Date().toISOString().slice(0, 10);
+}
 
-  return `${safeName || "Employee"}_Background_Authorization.pdf`;
+function pdfFileName(visitNote) {
+  return `${safeName(visitNote.clientName)}_Visit_Note_${safeDate(visitNote.dateOfService)}.pdf`;
+}
+
+function selectedServices(visitNote) {
+  const services = SERVICE_FIELDS
+    .filter(([, key]) => visitNote[key] === true || value(visitNote, key) === "on")
+    .map(([label]) => label);
+
+  const otherServices = value(visitNote, "otherServices");
+  if (otherServices && !services.includes("Other")) services.push("Other");
+  return { services, otherServices };
 }
 
 function createPdfContext() {
@@ -90,9 +111,7 @@ function createPdfContext() {
   }
 
   function ensure(spaceNeeded) {
-    if (y - spaceNeeded < PAGE.margin) {
-      addPage();
-    }
+    if (y - spaceNeeded < PAGE.margin) addPage();
   }
 
   function text(textValue, x, yPos, size = 9, font = FONT.body, color = 0) {
@@ -113,62 +132,22 @@ function createPdfContext() {
 
   function title() {
     text("Community Regenerative Solutions", 132, 748, 18, FONT.bold);
-    text("Background Check Authorization", 190, 724, 15, FONT.bold);
+    text("Visit Note / Care Log (CRS-CL04)", 187, 724, 15, FONT.bold);
     line(PAGE.margin, 710, PAGE.width - PAGE.margin, 710, 1);
     y = 690;
   }
 
   function section(titleText) {
-    ensure(34);
+    ensure(32);
     fillRect(PAGE.margin, y - 4, PAGE.width - PAGE.margin * 2, 18);
     text(titleText.toUpperCase(), PAGE.margin + 7, y + 1, 10, FONT.bold, 1);
-    y -= 26;
-  }
-
-  function field(label, fieldValue, x, width, options = {}) {
-    const lineY = y - 18;
-    text(label, x, y, options.labelSize || 7, FONT.bold);
-    line(x, lineY, x + width, lineY);
-    wrapText(fieldValue, Math.max(12, Math.floor(width / 5.2))).slice(0, options.maxLines || 2).forEach((part, index) => {
-      text(part, x + 2, lineY + 4 - index * 10, options.valueSize || 9);
-    });
-  }
-
-  function fieldRow(fields, height = 36) {
-    ensure(height + 4);
-    const gap = 12;
-    const width = (PAGE.width - PAGE.margin * 2 - gap * (fields.length - 1)) / fields.length;
-    fields.forEach(([label, fieldValue], index) => {
-      field(label, fieldValue, PAGE.margin + index * (width + gap), width);
-    });
-    y -= height;
-  }
-
-  function fullField(label, fieldValue, height = 42) {
-    ensure(height + 4);
-    field(label, fieldValue, PAGE.margin, PAGE.width - PAGE.margin * 2, { maxLines: 3 });
-    y -= height;
-  }
-
-  function paragraph(lines) {
-    const sourceLines = Array.isArray(lines) ? lines : [lines];
-    sourceLines.forEach((sourceLine) => {
-      const x = sourceLine.startsWith("-") ? PAGE.margin + 12 : PAGE.margin;
-      const wrapped = wrapText(sourceLine, sourceLine.startsWith("-") ? 90 : 95);
-      ensure(wrapped.length * 11 + 8);
-      wrapped.forEach((lineText) => {
-        text(lineText, x, y, 9);
-        y -= 11;
-      });
-      y -= 5;
-    });
-    y -= 4;
+    y -= 27;
   }
 
   function table(headers, rows, columnWidths) {
     if (!rows.length) return;
-    const totalWidth = columnWidths.reduce((sum, item) => sum + item, 0);
     const rowHeight = 24;
+    const totalWidth = columnWidths.reduce((sum, width) => sum + width, 0);
     const startX = PAGE.margin;
     ensure(rowHeight * (rows.length + 1) + 8);
 
@@ -188,13 +167,38 @@ function createPdfContext() {
       row.forEach((cell, index) => {
         if (index > 0) line(x, y, x, y - rowHeight);
         wrapText(cell, Math.floor((columnWidths[index] - 8) / 5.2)).slice(0, 2).forEach((part, lineIndex) => {
-          text(part, x + 4, y - 11 - lineIndex * 9, 8);
+          text(part, x + 4, y - 10 - lineIndex * 9, 8);
         });
         x += columnWidths[index];
       });
       y -= rowHeight;
     });
-    y -= 12;
+    y -= 11;
+  }
+
+  function fullBox(label, fieldValue, minHeight = 34) {
+    const normalized = normalizeText(fieldValue);
+    if (!normalized) return;
+    const lines = wrapText(normalized, 96);
+    const height = Math.max(minHeight, 20 + lines.length * 10);
+    ensure(height + 6);
+    rect(PAGE.margin, y - height, PAGE.width - PAGE.margin * 2, height);
+    text(label, PAGE.margin + 5, y - 11, 8, FONT.bold);
+    lines.forEach((lineText, index) => {
+      text(lineText, PAGE.margin + 5, y - 24 - index * 10, 8);
+    });
+    y -= height + 8;
+  }
+
+  function checkboxList(items) {
+    if (!items.length) return;
+    const lineHeight = 13;
+    ensure(items.length * lineHeight + 14);
+    items.forEach((item) => {
+      text(`[X] ${item}`, PAGE.margin + 3, y, 9);
+      y -= lineHeight;
+    });
+    y -= 4;
   }
 
   function finish() {
@@ -202,41 +206,52 @@ function createPdfContext() {
     return pages;
   }
 
-  return { title, section, fieldRow, fullField, paragraph, table, finish };
+  return { title, section, table, fullBox, checkboxList, finish };
 }
 
-function buildPdfPages(authorization) {
+function buildPdfPages(visitNote) {
   const pdf = createPdfContext();
+  const { services, otherServices } = selectedServices(visitNote);
   pdf.title();
 
-  pdf.section("Employee Information");
-  pdf.fieldRow([
-    ["Full Legal Name", value(authorization, "fullName")],
-    ["Date of Birth", value(authorization, "dateOfBirth")]
-  ]);
-  pdf.fieldRow([
-    ["Last 4 of SSN", value(authorization, "ssnLast4")]
-  ]);
-  pdf.fullField("Current Address", value(authorization, "currentAddress"), 48);
-
-  pdf.section("Authorization Text");
-  pdf.paragraph(AUTHORIZATION_TEXT);
-
-  pdf.section("Acknowledgment");
+  pdf.section("Visit Information");
   pdf.table(
-    ["Acknowledgment", "Checked"],
-    [["I authorize CRS to perform the required background checks", checked(authorization.backgroundAuthorization)]],
-    [440, 90]
+    ["Client", "Date", "Attendant", "Arrival / Departure"],
+    [[
+      value(visitNote, "clientName"),
+      value(visitNote, "dateOfService"),
+      value(visitNote, "attendantName"),
+      `${value(visitNote, "arrivalTime")} / ${value(visitNote, "departureTime")}`
+    ]],
+    [135, 85, 155, 155]
   );
 
-  pdf.section("Signature");
-  pdf.fieldRow([
-    ["Employee Full Name", value(authorization, "employeeSignatureName")],
-    ["Signature", value(authorization, "signature")]
-  ]);
-  pdf.fieldRow([
-    ["Date", value(authorization, "signatureDate")]
-  ]);
+  pdf.section("Services Provided");
+  pdf.checkboxList(services);
+  pdf.fullBox("Other services provided", otherServices, 34);
+
+  pdf.section("Client Condition / Observations");
+  pdf.table(["Condition Today"], [[value(visitNote, "clientCondition")]], [530]);
+  pdf.fullBox("Notes / observations", value(visitNote, "observationNotes"), 46);
+
+  pdf.section("Incidents / Concerns");
+  pdf.table(["Incident, injury, refusal, or unusual event?"], [[value(visitNote, "incidentOccurred")]], [530]);
+  pdf.fullBox("Details", value(visitNote, "incidentDetails"), 42);
+
+  pdf.section("Task Completion");
+  pdf.table(["Services completed as planned?"], [[value(visitNote, "servicesCompleted")]], [530]);
+  pdf.fullBox("Explanation", value(visitNote, "incompleteExplanation"), 42);
+
+  pdf.section("Signatures");
+  pdf.table(
+    ["Attendant Signature", "Client / Responsible Party Signature", "Date Signed"],
+    [[
+      value(visitNote, "attendantSignature"),
+      value(visitNote, "clientSignature"),
+      value(visitNote, "signedDate")
+    ]],
+    [190, 220, 120]
+  );
 
   return pdf.finish();
 }
@@ -281,8 +296,8 @@ function buildPdfBuffer(pageStreams) {
   return Buffer.from(pdf, "utf8");
 }
 
-function createBackgroundAuthorizationPdf(authorization) {
-  return buildPdfBuffer(buildPdfPages(authorization));
+function createClientVisitNotePdf(visitNote) {
+  return buildPdfBuffer(buildPdfPages(visitNote));
 }
 
 async function readJsonBody(req) {
@@ -302,17 +317,18 @@ async function readJsonBody(req) {
   return JSON.parse(rawBody || "{}");
 }
 
-function buildEmailHtml(authorization, submittedAtDisplay) {
+function buildEmailHtml(visitNote, submittedAtDisplay) {
   return `
-    <p>New CRS background check authorization submitted.</p>
-    <p><strong>Employee:</strong> ${escapeHtml(authorization.fullName)}</p>
-    <p><strong>Date of Birth:</strong> ${escapeHtml(authorization.dateOfBirth)}</p>
-    <p><strong>Last 4 of SSN:</strong> ${escapeHtml(authorization.ssnLast4)}</p>
+    <p>New CRS visit note submitted.</p>
+    <p><strong>Client:</strong> ${escapeHtml(visitNote.clientName)}</p>
+    <p><strong>Date of Service:</strong> ${escapeHtml(visitNote.dateOfService)}</p>
+    <p><strong>Attendant:</strong> ${escapeHtml(visitNote.attendantName)}</p>
+    <p><strong>Client condition:</strong> ${escapeHtml(visitNote.clientCondition)}</p>
     <p><strong>Submitted:</strong> ${escapeHtml(submittedAtDisplay)}</p>
   `;
 }
 
-async function sendEmail({ authorization, submittedAtDisplay, pdfBuffer }) {
+async function sendEmail({ visitNote, submittedAtDisplay, pdfBuffer }) {
   if (!process.env.RESEND_API_KEY) {
     throw new Error("Missing RESEND_API_KEY environment variable.");
   }
@@ -321,31 +337,31 @@ async function sendEmail({ authorization, submittedAtDisplay, pdfBuffer }) {
   const { data, error } = await resend.emails.send({
     from: "onboarding@resend.dev",
     to: "info@communityregenerativesolutions.com",
-    subject: `New CRS Background Authorization - ${normalizeText(authorization.fullName) || "Employee"}`,
-    html: buildEmailHtml(authorization, submittedAtDisplay),
+    subject: `New CRS Visit Note - ${normalizeText(visitNote.clientName) || "Client"}`,
+    html: buildEmailHtml(visitNote, submittedAtDisplay),
     attachments: [
       {
-        filename: pdfFileName(authorization),
+        filename: pdfFileName(visitNote),
         content: pdfBuffer
       }
     ]
   });
 
   if (error) {
-    console.error("Resend background authorization email failed:", error);
+    console.error("Resend visit note email failed:", error);
     throw new Error(`Resend email failed: ${error.message || JSON.stringify(error)}`);
   }
 
-  console.info("Resend background authorization email sent:", data);
+  console.info("Resend visit note email sent:", data);
   return data;
 }
 
 module.exports = async function handler(req, res) {
-  console.info("CRS route started: /api/submit-background", { method: req.method });
-  console.info("CRS route /api/submit-background: supabase helper loaded", {
+  console.info("CRS route started: /api/submit-client-visit-note", { method: req.method });
+  console.info("CRS route /api/submit-client-visit-note: supabase helper loaded", {
     storeSupabaseSubmission: typeof storeSupabaseSubmission === "function"
   });
-  console.info("CRS route /api/submit-background: env vars present", {
+  console.info("CRS route /api/submit-client-visit-note: env vars present", {
     SUPABASE_URL: Boolean(process.env.SUPABASE_URL),
     SUPABASE_ANON_KEY: Boolean(process.env.SUPABASE_ANON_KEY)
   });
@@ -357,22 +373,24 @@ module.exports = async function handler(req, res) {
 
   try {
     const body = await readJsonBody(req);
-    const authorization = body.authorization || body || {};
+    const visitNote = body.visitNote || body || {};
     const dateSubmitted = body.submittedAt || new Date().toISOString();
     const submittedAtDisplay = body.submittedAtDisplay || new Date().toLocaleString();
-    const pdfBuffer = createBackgroundAuthorizationPdf(authorization);
-    const emailResult = await sendEmail({ authorization, submittedAtDisplay, pdfBuffer });
+    const pdfBuffer = createClientVisitNotePdf(visitNote);
+    const generatedPdfFileName = pdfFileName(visitNote);
+    const emailResult = await sendEmail({ visitNote, submittedAtDisplay, pdfBuffer });
     const supabaseSubmission = await storeSupabaseSubmission({
-      fullName: normalizeText(authorization.fullName),
+      fullName: normalizeText(visitNote.clientName),
       email: "",
-      submissionType: "background",
+      submissionType: "client-visit-note",
       pdfBuffer,
+      pdfFileName: generatedPdfFileName,
       createdAt: dateSubmitted
     });
     const storedSubmission = await storeSubmission({
-      fullName: normalizeText(authorization.fullName),
+      fullName: normalizeText(visitNote.clientName),
       email: "",
-      submissionType: "background",
+      submissionType: "client-visit-note",
       pdfFileName: supabaseSubmission.pdfFileName,
       pdfUrl: supabaseSubmission.pdfUrl,
       dateSubmitted
@@ -385,9 +403,9 @@ module.exports = async function handler(req, res) {
       pdfUrl: supabaseSubmission.pdfUrl
     });
   } catch (error) {
-    console.error("CRS background authorization submission failed:", error);
+    console.error("CRS visit note submission failed:", error);
     return res.status(500).json({
-      error: error.message || "Background authorization submission failed."
+      error: error.message || "Visit note submission failed."
     });
   }
 };

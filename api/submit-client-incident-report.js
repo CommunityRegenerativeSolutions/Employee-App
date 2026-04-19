@@ -4,12 +4,31 @@ const { storeSupabaseSubmission } = require("./supabase");
 
 const PAGE = { width: 612, height: 792, margin: 42 };
 const FONT = { body: "F1", bold: "F2" };
-const AUTHORIZATION_TEXT = [
-  "I authorize Community Regenerative Solutions to obtain background checks as required by Texas HHSC regulations. This includes, but is not limited to:",
-  "- Texas Department of Public Safety (DPS) Criminal History Check",
-  "- Employee Misconduct Registry (EMR)",
-  "- Nurse Aide Registry (NAR)",
-  "I understand that this information will be used solely for employment eligibility and compliance purposes. I acknowledge that providing false or incomplete information may result in disqualification or termination."
+
+const INCIDENT_TYPE_FIELDS = [
+  ["Fall", "typeFall"],
+  ["Injury", "typeInjury"],
+  ["Refusal of Care", "typeRefusal"],
+  ["Change in Condition", "typeConditionChange"],
+  ["Behavioral Issue", "typeBehavioral"],
+  ["Safety Hazard", "typeSafetyHazard"],
+  ["Other", "typeOther"]
+];
+
+const ACTION_FIELDS = [
+  ["Assisted client", "actionAssisted"],
+  ["Provided basic first aid", "actionFirstAid"],
+  ["Contacted supervisor", "actionSupervisor"],
+  ["Contacted responsible party", "actionResponsibleParty"],
+  ["Emergency services called (911)", "actionEmergencyServices"],
+  ["No action required", "actionNone"],
+  ["Other", "actionOther"]
+];
+
+const NOTIFICATION_FIELDS = [
+  ["Supervisor notified", "notifySupervisor"],
+  ["Responsible party notified", "notifyResponsibleParty"],
+  ["Physician notified", "notifyPhysician"]
 ];
 
 function normalizeText(value) {
@@ -62,16 +81,28 @@ function value(data, key) {
   return normalizeText(data[key]);
 }
 
-function checked(valueText) {
-  return normalizeText(valueText) ? "Yes" : "";
+function safeName(valueText) {
+  return normalizeText(valueText)
+    .replace(/[^a-z0-9]+/gi, "_")
+    .replace(/^_|_$/g, "") || "Client";
 }
 
-function pdfFileName(authorization) {
-  const safeName = value(authorization, "fullName")
-    .replace(/[^a-z0-9]+/gi, "_")
-    .replace(/^_|_$/g, "");
+function safeDate(valueText) {
+  return normalizeText(valueText).replace(/[^0-9-]+/g, "") || new Date().toISOString().slice(0, 10);
+}
 
-  return `${safeName || "Employee"}_Background_Authorization.pdf`;
+function pdfFileName(incidentReport) {
+  return `${safeName(incidentReport.clientName)}_Incident_Report_${safeDate(incidentReport.incidentDate)}.pdf`;
+}
+
+function selectedList(data, fields, otherTextKey) {
+  const selected = fields
+    .filter(([, key]) => data[key] === true || value(data, key) === "on")
+    .map(([label]) => label);
+
+  const otherText = otherTextKey ? value(data, otherTextKey) : "";
+  if (otherText && !selected.includes("Other")) selected.push("Other");
+  return { selected, otherText };
 }
 
 function createPdfContext() {
@@ -90,9 +121,7 @@ function createPdfContext() {
   }
 
   function ensure(spaceNeeded) {
-    if (y - spaceNeeded < PAGE.margin) {
-      addPage();
-    }
+    if (y - spaceNeeded < PAGE.margin) addPage();
   }
 
   function text(textValue, x, yPos, size = 9, font = FONT.body, color = 0) {
@@ -113,62 +142,22 @@ function createPdfContext() {
 
   function title() {
     text("Community Regenerative Solutions", 132, 748, 18, FONT.bold);
-    text("Background Check Authorization", 190, 724, 15, FONT.bold);
+    text("Incident Report (CRS-CL05)", 210, 724, 15, FONT.bold);
     line(PAGE.margin, 710, PAGE.width - PAGE.margin, 710, 1);
     y = 690;
   }
 
   function section(titleText) {
-    ensure(34);
+    ensure(32);
     fillRect(PAGE.margin, y - 4, PAGE.width - PAGE.margin * 2, 18);
     text(titleText.toUpperCase(), PAGE.margin + 7, y + 1, 10, FONT.bold, 1);
-    y -= 26;
-  }
-
-  function field(label, fieldValue, x, width, options = {}) {
-    const lineY = y - 18;
-    text(label, x, y, options.labelSize || 7, FONT.bold);
-    line(x, lineY, x + width, lineY);
-    wrapText(fieldValue, Math.max(12, Math.floor(width / 5.2))).slice(0, options.maxLines || 2).forEach((part, index) => {
-      text(part, x + 2, lineY + 4 - index * 10, options.valueSize || 9);
-    });
-  }
-
-  function fieldRow(fields, height = 36) {
-    ensure(height + 4);
-    const gap = 12;
-    const width = (PAGE.width - PAGE.margin * 2 - gap * (fields.length - 1)) / fields.length;
-    fields.forEach(([label, fieldValue], index) => {
-      field(label, fieldValue, PAGE.margin + index * (width + gap), width);
-    });
-    y -= height;
-  }
-
-  function fullField(label, fieldValue, height = 42) {
-    ensure(height + 4);
-    field(label, fieldValue, PAGE.margin, PAGE.width - PAGE.margin * 2, { maxLines: 3 });
-    y -= height;
-  }
-
-  function paragraph(lines) {
-    const sourceLines = Array.isArray(lines) ? lines : [lines];
-    sourceLines.forEach((sourceLine) => {
-      const x = sourceLine.startsWith("-") ? PAGE.margin + 12 : PAGE.margin;
-      const wrapped = wrapText(sourceLine, sourceLine.startsWith("-") ? 90 : 95);
-      ensure(wrapped.length * 11 + 8);
-      wrapped.forEach((lineText) => {
-        text(lineText, x, y, 9);
-        y -= 11;
-      });
-      y -= 5;
-    });
-    y -= 4;
+    y -= 27;
   }
 
   function table(headers, rows, columnWidths) {
     if (!rows.length) return;
-    const totalWidth = columnWidths.reduce((sum, item) => sum + item, 0);
     const rowHeight = 24;
+    const totalWidth = columnWidths.reduce((sum, width) => sum + width, 0);
     const startX = PAGE.margin;
     ensure(rowHeight * (rows.length + 1) + 8);
 
@@ -188,13 +177,38 @@ function createPdfContext() {
       row.forEach((cell, index) => {
         if (index > 0) line(x, y, x, y - rowHeight);
         wrapText(cell, Math.floor((columnWidths[index] - 8) / 5.2)).slice(0, 2).forEach((part, lineIndex) => {
-          text(part, x + 4, y - 11 - lineIndex * 9, 8);
+          text(part, x + 4, y - 10 - lineIndex * 9, 8);
         });
         x += columnWidths[index];
       });
       y -= rowHeight;
     });
-    y -= 12;
+    y -= 11;
+  }
+
+  function fullBox(label, fieldValue, minHeight = 36) {
+    const normalized = normalizeText(fieldValue);
+    if (!normalized) return;
+    const lines = wrapText(normalized, 96);
+    const height = Math.max(minHeight, 20 + lines.length * 10);
+    ensure(height + 6);
+    rect(PAGE.margin, y - height, PAGE.width - PAGE.margin * 2, height);
+    text(label, PAGE.margin + 5, y - 11, 8, FONT.bold);
+    lines.forEach((lineText, index) => {
+      text(lineText, PAGE.margin + 5, y - 24 - index * 10, 8);
+    });
+    y -= height + 8;
+  }
+
+  function checkboxList(items) {
+    if (!items.length) return;
+    const lineHeight = 13;
+    ensure(items.length * lineHeight + 12);
+    items.forEach((item) => {
+      text(`[X] ${item}`, PAGE.margin + 3, y, 9);
+      y -= lineHeight;
+    });
+    y -= 4;
   }
 
   function finish() {
@@ -202,41 +216,79 @@ function createPdfContext() {
     return pages;
   }
 
-  return { title, section, fieldRow, fullField, paragraph, table, finish };
+  return { title, section, table, fullBox, checkboxList, finish };
 }
 
-function buildPdfPages(authorization) {
+function buildPdfPages(incidentReport) {
   const pdf = createPdfContext();
+  const incidentTypes = selectedList(incidentReport, INCIDENT_TYPE_FIELDS, "otherIncidentType");
+  const actions = selectedList(incidentReport, ACTION_FIELDS, "otherActions");
+  const notifications = selectedList(incidentReport, NOTIFICATION_FIELDS);
   pdf.title();
 
-  pdf.section("Employee Information");
-  pdf.fieldRow([
-    ["Full Legal Name", value(authorization, "fullName")],
-    ["Date of Birth", value(authorization, "dateOfBirth")]
-  ]);
-  pdf.fieldRow([
-    ["Last 4 of SSN", value(authorization, "ssnLast4")]
-  ]);
-  pdf.fullField("Current Address", value(authorization, "currentAddress"), 48);
-
-  pdf.section("Authorization Text");
-  pdf.paragraph(AUTHORIZATION_TEXT);
-
-  pdf.section("Acknowledgment");
+  pdf.section("Basic Information");
   pdf.table(
-    ["Acknowledgment", "Checked"],
-    [["I authorize CRS to perform the required background checks", checked(authorization.backgroundAuthorization)]],
-    [440, 90]
+    ["Client", "Date", "Time", "Attendant", "Location"],
+    [[
+      value(incidentReport, "clientName"),
+      value(incidentReport, "incidentDate"),
+      value(incidentReport, "incidentTime"),
+      value(incidentReport, "attendantName"),
+      value(incidentReport, "incidentLocation")
+    ]],
+    [118, 78, 62, 128, 144]
   );
 
+  pdf.section("Type of Incident");
+  pdf.checkboxList(incidentTypes.selected);
+  pdf.fullBox("Other", incidentTypes.otherText, 32);
+
+  pdf.section("Description of Incident");
+  pdf.fullBox("Description", value(incidentReport, "incidentDescription"), 54);
+
+  pdf.section("Action Taken");
+  pdf.checkboxList(actions.selected);
+  pdf.fullBox("Other actions", actions.otherText, 32);
+
+  pdf.section("Client Condition After Incident");
+  pdf.table(["Condition"], [[value(incidentReport, "clientConditionAfter")]], [530]);
+  pdf.fullBox("Notes", value(incidentReport, "conditionNotes"), 40);
+
+  pdf.section("Notifications");
+  pdf.checkboxList(notifications.selected);
+  if (value(incidentReport, "timeNotified") || value(incidentReport, "personNotified")) {
+    pdf.table(
+      ["Time Notified", "Person Notified"],
+      [[value(incidentReport, "timeNotified"), value(incidentReport, "personNotified")]],
+      [160, 370]
+    );
+  }
+
+  pdf.section("Additional Notes");
+  pdf.fullBox("Additional Notes", value(incidentReport, "additionalNotes"), 44);
+
   pdf.section("Signature");
-  pdf.fieldRow([
-    ["Employee Full Name", value(authorization, "employeeSignatureName")],
-    ["Signature", value(authorization, "signature")]
-  ]);
-  pdf.fieldRow([
-    ["Date", value(authorization, "signatureDate")]
-  ]);
+  pdf.table(
+    ["Attendant Name", "Signature", "Date"],
+    [[
+      value(incidentReport, "signatureAttendantName"),
+      value(incidentReport, "attendantSignature"),
+      value(incidentReport, "signatureDate")
+    ]],
+    [180, 230, 120]
+  );
+
+  if (value(incidentReport, "supervisorReviewName") || value(incidentReport, "supervisorSignature") || value(incidentReport, "reviewDate")) {
+    pdf.table(
+      ["Supervisor Review Name", "Supervisor Signature", "Review Date"],
+      [[
+        value(incidentReport, "supervisorReviewName"),
+        value(incidentReport, "supervisorSignature"),
+        value(incidentReport, "reviewDate")
+      ]],
+      [180, 230, 120]
+    );
+  }
 
   return pdf.finish();
 }
@@ -281,8 +333,8 @@ function buildPdfBuffer(pageStreams) {
   return Buffer.from(pdf, "utf8");
 }
 
-function createBackgroundAuthorizationPdf(authorization) {
-  return buildPdfBuffer(buildPdfPages(authorization));
+function createClientIncidentReportPdf(incidentReport) {
+  return buildPdfBuffer(buildPdfPages(incidentReport));
 }
 
 async function readJsonBody(req) {
@@ -302,17 +354,19 @@ async function readJsonBody(req) {
   return JSON.parse(rawBody || "{}");
 }
 
-function buildEmailHtml(authorization, submittedAtDisplay) {
+function buildEmailHtml(incidentReport, submittedAtDisplay) {
   return `
-    <p>New CRS background check authorization submitted.</p>
-    <p><strong>Employee:</strong> ${escapeHtml(authorization.fullName)}</p>
-    <p><strong>Date of Birth:</strong> ${escapeHtml(authorization.dateOfBirth)}</p>
-    <p><strong>Last 4 of SSN:</strong> ${escapeHtml(authorization.ssnLast4)}</p>
+    <p>New CRS incident report submitted.</p>
+    <p><strong>Client:</strong> ${escapeHtml(incidentReport.clientName)}</p>
+    <p><strong>Date of Incident:</strong> ${escapeHtml(incidentReport.incidentDate)}</p>
+    <p><strong>Time of Incident:</strong> ${escapeHtml(incidentReport.incidentTime)}</p>
+    <p><strong>Attendant:</strong> ${escapeHtml(incidentReport.attendantName)}</p>
+    <p><strong>Condition After Incident:</strong> ${escapeHtml(incidentReport.clientConditionAfter)}</p>
     <p><strong>Submitted:</strong> ${escapeHtml(submittedAtDisplay)}</p>
   `;
 }
 
-async function sendEmail({ authorization, submittedAtDisplay, pdfBuffer }) {
+async function sendEmail({ incidentReport, submittedAtDisplay, pdfBuffer }) {
   if (!process.env.RESEND_API_KEY) {
     throw new Error("Missing RESEND_API_KEY environment variable.");
   }
@@ -321,31 +375,31 @@ async function sendEmail({ authorization, submittedAtDisplay, pdfBuffer }) {
   const { data, error } = await resend.emails.send({
     from: "onboarding@resend.dev",
     to: "info@communityregenerativesolutions.com",
-    subject: `New CRS Background Authorization - ${normalizeText(authorization.fullName) || "Employee"}`,
-    html: buildEmailHtml(authorization, submittedAtDisplay),
+    subject: `New CRS Incident Report - ${normalizeText(incidentReport.clientName) || "Client"}`,
+    html: buildEmailHtml(incidentReport, submittedAtDisplay),
     attachments: [
       {
-        filename: pdfFileName(authorization),
+        filename: pdfFileName(incidentReport),
         content: pdfBuffer
       }
     ]
   });
 
   if (error) {
-    console.error("Resend background authorization email failed:", error);
+    console.error("Resend incident report email failed:", error);
     throw new Error(`Resend email failed: ${error.message || JSON.stringify(error)}`);
   }
 
-  console.info("Resend background authorization email sent:", data);
+  console.info("Resend incident report email sent:", data);
   return data;
 }
 
 module.exports = async function handler(req, res) {
-  console.info("CRS route started: /api/submit-background", { method: req.method });
-  console.info("CRS route /api/submit-background: supabase helper loaded", {
+  console.info("CRS route started: /api/submit-client-incident-report", { method: req.method });
+  console.info("CRS route /api/submit-client-incident-report: supabase helper loaded", {
     storeSupabaseSubmission: typeof storeSupabaseSubmission === "function"
   });
-  console.info("CRS route /api/submit-background: env vars present", {
+  console.info("CRS route /api/submit-client-incident-report: env vars present", {
     SUPABASE_URL: Boolean(process.env.SUPABASE_URL),
     SUPABASE_ANON_KEY: Boolean(process.env.SUPABASE_ANON_KEY)
   });
@@ -357,22 +411,24 @@ module.exports = async function handler(req, res) {
 
   try {
     const body = await readJsonBody(req);
-    const authorization = body.authorization || body || {};
+    const incidentReport = body.incidentReport || body || {};
     const dateSubmitted = body.submittedAt || new Date().toISOString();
     const submittedAtDisplay = body.submittedAtDisplay || new Date().toLocaleString();
-    const pdfBuffer = createBackgroundAuthorizationPdf(authorization);
-    const emailResult = await sendEmail({ authorization, submittedAtDisplay, pdfBuffer });
+    const pdfBuffer = createClientIncidentReportPdf(incidentReport);
+    const generatedPdfFileName = pdfFileName(incidentReport);
+    const emailResult = await sendEmail({ incidentReport, submittedAtDisplay, pdfBuffer });
     const supabaseSubmission = await storeSupabaseSubmission({
-      fullName: normalizeText(authorization.fullName),
+      fullName: normalizeText(incidentReport.clientName),
       email: "",
-      submissionType: "background",
+      submissionType: "client-incident-report",
       pdfBuffer,
+      pdfFileName: generatedPdfFileName,
       createdAt: dateSubmitted
     });
     const storedSubmission = await storeSubmission({
-      fullName: normalizeText(authorization.fullName),
+      fullName: normalizeText(incidentReport.clientName),
       email: "",
-      submissionType: "background",
+      submissionType: "client-incident-report",
       pdfFileName: supabaseSubmission.pdfFileName,
       pdfUrl: supabaseSubmission.pdfUrl,
       dateSubmitted
@@ -385,9 +441,9 @@ module.exports = async function handler(req, res) {
       pdfUrl: supabaseSubmission.pdfUrl
     });
   } catch (error) {
-    console.error("CRS background authorization submission failed:", error);
+    console.error("CRS incident report submission failed:", error);
     return res.status(500).json({
-      error: error.message || "Background authorization submission failed."
+      error: error.message || "Incident report submission failed."
     });
   }
 };
