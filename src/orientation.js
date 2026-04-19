@@ -97,7 +97,7 @@ function collectSubmission() {
     formType: "orientation",
     submittedAt: new Date().toISOString(),
     submittedAtDisplay: new Date().toLocaleString(),
-    packet
+    data: packet
   };
 }
 

@@ -121,7 +121,7 @@ function collectSubmission() {
     formType: "competency",
     submittedAt: new Date().toISOString(),
     submittedAtDisplay: new Date().toLocaleString(),
-    evaluation
+    data: evaluation
   };
 }
 

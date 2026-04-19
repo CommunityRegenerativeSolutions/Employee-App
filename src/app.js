@@ -432,7 +432,7 @@ function buildServerPayload(submission) {
     formType: "application",
     submittedAt: submission.submittedAt,
     submittedAtDisplay: submission.submittedAtDisplay,
-    applicant: submission.applicant,
+    data: submission.applicant,
     files: submission.files,
     emailBody: buildEmailBody(submission)
   };

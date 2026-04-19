@@ -90,7 +90,7 @@ function collectSubmission() {
     formType: "background",
     submittedAt: new Date().toISOString(),
     submittedAtDisplay: new Date().toLocaleString(),
-    authorization
+    data: authorization
   };
 }
 
