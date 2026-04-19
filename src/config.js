@@ -5,5 +5,5 @@
 */
 window.CRSApplicationConfig = {
   submissionEmail: "Info@communityregenerativesolutions.com",
-  submissionEndpoint: "/api/submit-application"
+  submissionEndpoint: "/api/submit-form"
 };

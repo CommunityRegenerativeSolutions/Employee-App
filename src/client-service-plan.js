@@ -140,6 +140,7 @@ function collectSubmission() {
     servicePlan[checkbox.name] = checkbox.checked;
   });
   return {
+    formType: "client-service-plan",
     submittedAt: new Date().toISOString(),
     submittedAtDisplay: new Date().toLocaleString(),
     servicePlan
@@ -152,7 +153,7 @@ function setSubmitting(isSubmitting) {
 }
 
 async function submitClientServicePlan(submission) {
-  const response = await fetch("/api/submit-client-service-plan", {
+  const response = await fetch("/api/submit-form", {
     method: "POST",
     headers: { Accept: "application/json", "Content-Type": "application/json" },
     body: JSON.stringify(submission)

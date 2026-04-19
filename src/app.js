@@ -429,6 +429,7 @@ function isSubmissionEndpointConfigured() {
 
 function buildServerPayload(submission) {
   return {
+    formType: "application",
     submittedAt: submission.submittedAt,
     submittedAtDisplay: submission.submittedAtDisplay,
     applicant: submission.applicant,

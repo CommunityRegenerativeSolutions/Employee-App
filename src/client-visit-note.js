@@ -112,6 +112,7 @@ function collectSubmission() {
   });
 
   return {
+    formType: "client-visit-note",
     submittedAt: new Date().toISOString(),
     submittedAtDisplay: new Date().toLocaleString(),
     visitNote
@@ -124,9 +125,9 @@ function setSubmitting(isSubmitting) {
 }
 
 async function submitClientVisitNote(submission) {
-  console.info("CRS visit note: Sending POST request to /api/submit-client-visit-note.");
+  console.info("CRS visit note: Sending POST request to /api/submit-form.");
 
-  const response = await fetch("/api/submit-client-visit-note", {
+  const response = await fetch("/api/submit-form", {
     method: "POST",
     headers: {
       Accept: "application/json",

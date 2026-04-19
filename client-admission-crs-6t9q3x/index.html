@@ -18,8 +18,9 @@
         <p>Please review each section carefully. This packet explains CRS private-pay, non-skilled personal assistance services. Required fields are marked with an asterisk.</p>
       </section>
 
-      <form id="clientAdmissionForm" class="application-form" method="POST" action="/api/submit-client-admission" enctype="application/x-www-form-urlencoded" novalidate>
+      <form id="clientAdmissionForm" class="application-form" method="POST" action="/api/submit-form" enctype="application/x-www-form-urlencoded" novalidate>
         <div id="errorSummary" class="error-summary" tabindex="-1" hidden></div>
+        <input type="hidden" name="formType" value="client-admission">
 
         <section class="form-section" aria-labelledby="introTitle">
           <h2 id="introTitle">1. Introduction</h2>

@@ -87,6 +87,7 @@ function collectSubmission() {
   });
 
   return {
+    formType: "background",
     submittedAt: new Date().toISOString(),
     submittedAtDisplay: new Date().toLocaleString(),
     authorization
@@ -99,9 +100,9 @@ function setSubmitting(isSubmitting) {
 }
 
 async function submitBackgroundAuthorization(submission) {
-  console.info("CRS background authorization: Sending POST request to /api/submit-background.");
+  console.info("CRS background authorization: Sending POST request to /api/submit-form.");
 
-  const response = await fetch("/api/submit-background", {
+  const response = await fetch("/api/submit-form", {
     method: "POST",
     headers: {
       Accept: "application/json",

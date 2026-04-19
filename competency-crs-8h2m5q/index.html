@@ -299,8 +299,9 @@
         <p>PAS Attendant Competency Evaluation</p>
       </header>
 
-      <form id="competencyForm" method="POST" action="/api/submit-competency" novalidate>
+      <form id="competencyForm" method="POST" action="/api/submit-form" novalidate>
         <div id="errorSummary" class="error-summary" tabindex="-1" hidden></div>
+        <input type="hidden" name="formType" value="competency">
 
         <section class="top-fields" aria-label="Evaluation information">
           <div class="line-field">

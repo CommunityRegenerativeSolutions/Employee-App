@@ -18,8 +18,9 @@
         <p>Please complete this intake form so Community Regenerative Solutions can review requested non-skilled personal assistance services. Required fields are marked with an asterisk.</p>
       </section>
 
-      <form id="clientIntakeForm" class="application-form" method="POST" action="/api/submit-client-intake" enctype="application/x-www-form-urlencoded" novalidate>
+      <form id="clientIntakeForm" class="application-form" method="POST" action="/api/submit-form" enctype="application/x-www-form-urlencoded" novalidate>
         <div id="errorSummary" class="error-summary" tabindex="-1" hidden></div>
+        <input type="hidden" name="formType" value="client-intake">
 
         <section class="form-section" aria-labelledby="clientInfoTitle">
           <h2 id="clientInfoTitle">Client Information</h2>

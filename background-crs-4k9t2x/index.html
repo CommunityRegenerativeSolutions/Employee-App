@@ -19,8 +19,9 @@
       </section>
 
       <!-- Private direct-link form. This page is not linked from the public site. -->
-      <form id="backgroundForm" class="application-form" method="POST" action="/api/submit-background" enctype="application/x-www-form-urlencoded" novalidate>
+      <form id="backgroundForm" class="application-form" method="POST" action="/api/submit-form" enctype="application/x-www-form-urlencoded" novalidate>
         <div id="errorSummary" class="error-summary" tabindex="-1" hidden></div>
+        <input type="hidden" name="formType" value="background">
 
         <section class="form-section" aria-labelledby="employeeInfoTitle">
           <h2 id="employeeInfoTitle">Employee Information</h2>

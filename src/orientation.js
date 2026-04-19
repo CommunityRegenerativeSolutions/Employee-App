@@ -94,6 +94,7 @@ function collectSubmission() {
   });
 
   return {
+    formType: "orientation",
     submittedAt: new Date().toISOString(),
     submittedAtDisplay: new Date().toLocaleString(),
     packet
@@ -106,9 +107,9 @@ function setSubmitting(isSubmitting) {
 }
 
 async function submitOrientationPacket(submission) {
-  console.info("CRS orientation packet: Sending POST request to /api/submit-orientation.");
+  console.info("CRS orientation packet: Sending POST request to /api/submit-form.");
 
-  const response = await fetch("/api/submit-orientation", {
+  const response = await fetch("/api/submit-form", {
     method: "POST",
     headers: {
       Accept: "application/json",

@@ -106,6 +106,7 @@ function collectSubmission() {
   });
 
   return {
+    formType: "client-intake",
     submittedAt: new Date().toISOString(),
     submittedAtDisplay: new Date().toLocaleString(),
     intake
@@ -118,9 +119,9 @@ function setSubmitting(isSubmitting) {
 }
 
 async function submitClientIntake(submission) {
-  console.info("CRS client intake: Sending POST request to /api/submit-client-intake.");
+  console.info("CRS client intake: Sending POST request to /api/submit-form.");
 
-  const response = await fetch("/api/submit-client-intake", {
+  const response = await fetch("/api/submit-form", {
     method: "POST",
     headers: {
       Accept: "application/json",

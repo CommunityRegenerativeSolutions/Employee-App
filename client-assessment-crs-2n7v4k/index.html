@@ -18,8 +18,9 @@
         <p>Complete this PAS-appropriate initial assessment to document the client's current condition, functional needs, safety risks, and recommended non-skilled services. Required fields are marked with an asterisk.</p>
       </section>
 
-      <form id="clientAssessmentForm" class="application-form" method="POST" action="/api/submit-client-assessment" enctype="application/x-www-form-urlencoded" novalidate>
+      <form id="clientAssessmentForm" class="application-form" method="POST" action="/api/submit-form" enctype="application/x-www-form-urlencoded" novalidate>
         <div id="errorSummary" class="error-summary" tabindex="-1" hidden></div>
+        <input type="hidden" name="formType" value="client-assessment">
 
         <section class="form-section" aria-labelledby="clientIdTitle">
           <h2 id="clientIdTitle">Client Identification</h2>

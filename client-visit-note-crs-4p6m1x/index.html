@@ -18,8 +18,9 @@
         <p>Complete this short visit note after each PAS visit. Required fields are marked with an asterisk.</p>
       </section>
 
-      <form id="clientVisitNoteForm" class="application-form" method="POST" action="/api/submit-client-visit-note" enctype="application/x-www-form-urlencoded" novalidate>
+      <form id="clientVisitNoteForm" class="application-form" method="POST" action="/api/submit-form" enctype="application/x-www-form-urlencoded" novalidate>
         <div id="errorSummary" class="error-summary" tabindex="-1" hidden></div>
+        <input type="hidden" name="formType" value="client-visit-note">
 
         <section class="form-section" aria-labelledby="visitInfoTitle">
           <h2 id="visitInfoTitle">Visit Information</h2>

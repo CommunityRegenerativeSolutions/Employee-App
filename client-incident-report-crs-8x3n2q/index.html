@@ -18,8 +18,9 @@
         <p>Complete this report as soon as possible after an incident, change, refusal, or safety concern. Required fields are marked with an asterisk.</p>
       </section>
 
-      <form id="clientIncidentReportForm" class="application-form" method="POST" action="/api/submit-client-incident-report" enctype="application/x-www-form-urlencoded" novalidate>
+      <form id="clientIncidentReportForm" class="application-form" method="POST" action="/api/submit-form" enctype="application/x-www-form-urlencoded" novalidate>
         <div id="errorSummary" class="error-summary" tabindex="-1" hidden></div>
+        <input type="hidden" name="formType" value="client-incident-report">
 
         <section class="form-section" aria-labelledby="basicInfoTitle">
           <h2 id="basicInfoTitle">Basic Information</h2>

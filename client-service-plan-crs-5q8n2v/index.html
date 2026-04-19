@@ -98,8 +98,9 @@
         <p><strong>Private-Pay Personal Assistance Services Plan.</strong> Complete this compact service plan for authorized non-skilled PAS tasks, assistance levels, safety instructions, and client preferences.</p>
       </section>
 
-      <form id="clientServicePlanForm" class="application-form" method="POST" action="/api/submit-client-service-plan" enctype="application/x-www-form-urlencoded" novalidate>
+      <form id="clientServicePlanForm" class="application-form" method="POST" action="/api/submit-form" enctype="application/x-www-form-urlencoded" novalidate>
         <div id="errorSummary" class="error-summary" tabindex="-1" hidden></div>
+        <input type="hidden" name="formType" value="client-service-plan">
 
         <section class="form-section" aria-labelledby="headerTitle">
           <h2 id="headerTitle">Header Section</h2>

@@ -91,6 +91,7 @@ function collectSubmission() {
   });
 
   return {
+    formType: "client-incident-report",
     submittedAt: new Date().toISOString(),
     submittedAtDisplay: new Date().toLocaleString(),
     incidentReport
@@ -103,9 +104,9 @@ function setSubmitting(isSubmitting) {
 }
 
 async function submitClientIncidentReport(submission) {
-  console.info("CRS incident report: Sending POST request to /api/submit-client-incident-report.");
+  console.info("CRS incident report: Sending POST request to /api/submit-form.");
 
-  const response = await fetch("/api/submit-client-incident-report", {
+  const response = await fetch("/api/submit-form", {
     method: "POST",
     headers: {
       Accept: "application/json",

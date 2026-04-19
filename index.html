@@ -19,8 +19,9 @@
       </section>
 
       <!-- Public applicant-facing form. Edit labels and fields here when the application changes. -->
-      <form id="applicationForm" class="application-form" method="POST" action="/api/submit-application" enctype="application/x-www-form-urlencoded" novalidate>
+      <form id="applicationForm" class="application-form" method="POST" action="/api/submit-form" enctype="application/x-www-form-urlencoded" novalidate>
         <div id="errorSummary" class="error-summary" tabindex="-1" hidden></div>
+        <input type="hidden" name="formType" value="application">
 
         <!-- Section 1: applicant contact details -->
         <section class="form-section" aria-labelledby="personalInfoTitle">

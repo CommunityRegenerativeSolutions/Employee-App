@@ -106,6 +106,7 @@ function collectSubmission() {
   });
 
   return {
+    formType: "client-assessment",
     submittedAt: new Date().toISOString(),
     submittedAtDisplay: new Date().toLocaleString(),
     assessment
@@ -118,9 +119,9 @@ function setSubmitting(isSubmitting) {
 }
 
 async function submitClientAssessment(submission) {
-  console.info("CRS client assessment: Sending POST request to /api/submit-client-assessment.");
+  console.info("CRS client assessment: Sending POST request to /api/submit-form.");
 
-  const response = await fetch("/api/submit-client-assessment", {
+  const response = await fetch("/api/submit-form", {
     method: "POST",
     headers: {
       Accept: "application/json",

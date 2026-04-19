@@ -75,6 +75,7 @@ function collectSubmission() {
   });
 
   return {
+    formType: "client-admission",
     submittedAt: new Date().toISOString(),
     submittedAtDisplay: new Date().toLocaleString(),
     admission
@@ -87,9 +88,9 @@ function setSubmitting(isSubmitting) {
 }
 
 async function submitClientAdmission(submission) {
-  console.info("CRS client admission: Sending POST request to /api/submit-client-admission.");
+  console.info("CRS client admission: Sending POST request to /api/submit-form.");
 
-  const response = await fetch("/api/submit-client-admission", {
+  const response = await fetch("/api/submit-form", {
     method: "POST",
     headers: {
       Accept: "application/json",

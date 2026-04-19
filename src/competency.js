@@ -118,6 +118,7 @@ function collectSubmission() {
   });
 
   return {
+    formType: "competency",
     submittedAt: new Date().toISOString(),
     submittedAtDisplay: new Date().toLocaleString(),
     evaluation
@@ -130,9 +131,9 @@ function setSubmitting(isSubmitting) {
 }
 
 async function submitCompetencyEvaluation(submission) {
-  console.info("CRS competency evaluation: Sending POST request to /api/submit-competency.");
+  console.info("CRS competency evaluation: Sending POST request to /api/submit-form.");
 
-  const response = await fetch("/api/submit-competency", {
+  const response = await fetch("/api/submit-form", {
     method: "POST",
     headers: {
       Accept: "application/json",
